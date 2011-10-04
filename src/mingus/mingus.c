@@ -27,96 +27,72 @@
 
 #include "stdafx.h"
 
-#include <stdio.h>
-
-/**
- * The number of existing registers in the
- * virtual machine.
- */
-#define NUM_REGS 4
-
-unsigned regs[NUM_REGS];
+#include "mingus.h"
 
 /**
  * The example program opcodes
  * to be executed for testing.
  */
-unsigned program[] = {
+unsigned int program[] = {
     0x1064,
     0x11C8,
     0x2201,
     0x0000
 };
 
-int pc = 0;
-
-/* fetch the next word from the program */
-int fetch() {
-  return program[pc++];
+unsigned int mingusFetch(struct State_t *state) {
+    return state->program[state->pc++];
 }
 
-/* instruction fields */
-int instrNum = 0;
-int reg1 = 0;
-int reg2 = 0;
-int reg3 = 0;
-int imm = 0;
-
-/* decode a word */
-void decode(int instr) {
-  instrNum = (instr & 0xF000) >> 12;
-  reg1 = (instr & 0x0F00 ) >>  8;
-  reg2 = (instr & 0x00F0) >>  4;
-  reg3 = (instr & 0x000F);
-  imm = (instr & 0x00FF);
+void mingusDecode(struct State_t *state, unsigned int instruction) {
+    /* populates the (current) instruction with the decoded values */
+    state->instruction.code = (instruction & 0xF000) >> 12;
+    state->instruction.reg1 = (instruction & 0x0F00 ) >> 8;
+    state->instruction.reg2 = (instruction & 0x00F0) >> 4;
+    state->instruction.reg3 = (instruction & 0x000F);
+    state->instruction.imediate = (instruction & 0x00FF);
 }
 
-/* the VM runs until this flag becomes 0 */
-int running = 1;
+void mingusEval(struct State_t *state) {
+    /* retrieves the current instruction */
+    struct Instruction_t *instruction = &state->instruction;
 
-typedef struct State {
-    int running;
-
-} State_t;
-
-/* evaluate the last decoded instruction */
-void eval() {
     /* swtiches over the instruction number */
-    switch(instrNum) {
+    switch(instruction->code) {
         /* in case it's the halt instruction */
         case 0:
             printf("halt\n");
 
             /* unsets the runnig flag */
-            running = 0;
+            state->running = 0;
 
             /* breaks the switch */
             break;
 
         /* in case it's the loadi instruction */
         case 1:
-            printf("loadi r%d #%d\n", reg1, imm);
+            printf("loadi r%d #%d\n", instruction->reg1, instruction->imediate);
 
             /* sets the integer in the register */
-            regs[reg1] = imm;
+            state->registers[instruction->reg1] = instruction->imediate;
 
             /* breaks the switch */
             break;
 
         /* in case it's the add instruction */
         case 2:
-            printf("add r%d r%d r%d\n", reg1, reg2, reg3);
+            printf("add r%d r%d r%d\n", instruction->reg1, instruction->reg2, instruction->reg3);
 
             /* sums both registers and puts the result
             in the third register */
-            regs[reg1] = regs[reg2] + regs[reg3];
+            state->registers[instruction->reg1] = state->registers[instruction->reg2] + state->registers[instruction->reg3];
 
             /* breaks the switch */
             break;
     }
 }
 
-void showRegisters() {
+void showRegisters(struct State_t *state) {
     /* allocates the index */
     int index;
 
@@ -124,8 +100,8 @@ void showRegisters() {
     printf("regs = ");
 
     /* iterates over all the registers */
-    for(index = 0; index < NUM_REGS; index++) {
-        printf("%04X ", regs[index]);
+    for(index = 0; index < NUMBER_REGISTERS; index++) {
+        printf("%04X ", state->registers[index]);
     }
 
     /* prints the newline */
@@ -136,23 +112,26 @@ void run() {
     /* allocates the instruction */
     int instruction;
 
+    /* creates the virtual machine state */
+    struct State_t state = { 1, 0, program };
+
     /* iterates while the running flag is set */
-    while(running) {
+    while(state.running) {
         /* shows the registers */
-        showRegisters();
+        showRegisters(&state);
 
         /* fetches the next instruction */
-        instruction = fetch();
+        instruction = mingusFetch(&state);
 
         /* decodes the instruction */
-        decode(instruction);
+        mingusDecode(&state, instruction);
 
         /* evaluates the current state */
-        eval();
+        mingusEval(&state);
     }
 
     /* shows the registers */
-    showRegisters();
+    showRegisters(&state);
 }
 
 int main(int argc, const char * argv[]) {
