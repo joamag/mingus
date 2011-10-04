@@ -101,6 +101,7 @@ void showRegisters(struct State_t *state) {
 
     /* iterates over all the registers */
     for(index = 0; index < NUMBER_REGISTERS; index++) {
+		/* prints the register information */
         printf("%04X ", state->registers[index]);
     }
 
