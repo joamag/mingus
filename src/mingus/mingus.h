@@ -78,5 +78,7 @@ void mingusDecode(struct State_t *state, unsigned int instruction);
 /**
  * Evaluates the latest decoded instruction, and
  * changes the current machine state accordingly.
+ *
+ * @param state The current virtual machine state.
  */
 void mingusEval(struct State_t *state);
