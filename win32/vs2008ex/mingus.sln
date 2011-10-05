@@ -3,18 +3,24 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C++ Express 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mingus", "mingus.vcproj", "{3F6A09F3-EA8D-42A8-B1C3-E33D6215EFD8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mingus_assembler", "mingus_assembler.vcproj", "{0387A56C-58A0-4D5F-AC95-055F7D18CDAA}"
+EndProject
 Global
-    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-        Debug|Win32 = Debug|Win32
-        Release|Win32 = Release|Win32
-    EndGlobalSection
-    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-        {3F6A09F3-EA8D-42A8-B1C3-E33D6215EFD8}.Debug|Win32.ActiveCfg = Debug|Win32
-        {3F6A09F3-EA8D-42A8-B1C3-E33D6215EFD8}.Debug|Win32.Build.0 = Debug|Win32
-        {3F6A09F3-EA8D-42A8-B1C3-E33D6215EFD8}.Release|Win32.ActiveCfg = Release|Win32
-        {3F6A09F3-EA8D-42A8-B1C3-E33D6215EFD8}.Release|Win32.Build.0 = Release|Win32
-    EndGlobalSection
-    GlobalSection(SolutionProperties) = preSolution
-        HideSolutionNode = FALSE
-    EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3F6A09F3-EA8D-42A8-B1C3-E33D6215EFD8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3F6A09F3-EA8D-42A8-B1C3-E33D6215EFD8}.Debug|Win32.Build.0 = Debug|Win32
+		{3F6A09F3-EA8D-42A8-B1C3-E33D6215EFD8}.Release|Win32.ActiveCfg = Release|Win32
+		{3F6A09F3-EA8D-42A8-B1C3-E33D6215EFD8}.Release|Win32.Build.0 = Release|Win32
+		{0387A56C-58A0-4D5F-AC95-055F7D18CDAA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0387A56C-58A0-4D5F-AC95-055F7D18CDAA}.Debug|Win32.Build.0 = Debug|Win32
+		{0387A56C-58A0-4D5F-AC95-055F7D18CDAA}.Release|Win32.ActiveCfg = Release|Win32
+		{0387A56C-58A0-4D5F-AC95-055F7D18CDAA}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 EndGlobal
