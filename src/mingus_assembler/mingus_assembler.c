@@ -29,6 +29,16 @@
 
 int main(int argc, const char *argv[]) {
 	FILE *file = fopen("C:/calc.mia", "rb");
+
+	/**
+	 * iterate over all the lines in the file
+	 * 1. check if the line is empty (skip)
+	 * 2. check if the line contains a comment (ignore)
+	 * 3. check the name of the opcode
+	 * 4. retrieve the appropriate arguments to the operation
+	 */
+	
+
 	fclose(file);
 	return 0;
 }
