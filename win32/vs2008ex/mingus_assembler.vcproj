@@ -48,6 +48,7 @@
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="4"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -120,6 +121,7 @@
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="3"
+				CompileAs="1"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -171,11 +173,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\mingus_assembler\mingus_assembler.cpp"
+				RelativePath="..\..\src\mingus_assembler\mingus_assembler.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\mingus_assembler\stdafx.cpp"
+				RelativePath="..\..\src\mingus_assembler\stdafx.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"

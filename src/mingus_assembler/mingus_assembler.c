@@ -28,5 +28,8 @@
 #include "stdafx.h"
 
 int main(int argc, const char *argv[]) {
+	FILE *file = fopen("C:/calc.mia", "rb");
+	fclose(file);
+
 	return 0;
 }
