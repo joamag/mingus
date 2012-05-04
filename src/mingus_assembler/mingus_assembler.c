@@ -1,6 +1,6 @@
 /*
  Mingus Virtual Machine
- Copyright (C) 2008 Jo„o Magalh„es
+ Copyright (C) 2008 Jo√£o Magalh√£es
 
  This file is part of Mingus Virtual Machine.
 
@@ -17,28 +17,28 @@
  You should have received a copy of the GNU General Public License
  along with Mingus Virtual Machine. If not, see <http://www.gnu.org/licenses/>.
 
- __author__    = Jo„o Magalh„es <joamag@hive.pt>
+ __author__    = Jo√£o Magalh√£es <joamag@hive.pt>
  __version__   = 1.0.0
  __revision__  = $LastChangedRevision$
  __date__      = $LastChangedDate$
- __copyright__ = Copyright (c) 2008 Jo„o Magalh„es
+ __copyright__ = Copyright (c) 2008 Jo√£o Magalh√£es
  __license__   = GNU General Public License (GPL), Version 3
 */
 
 #include "stdafx.h"
 
 int main(int argc, const char *argv[]) {
-	FILE *file = fopen("C:/calc.mia", "rb");
+    FILE *file = fopen("C:/calc.mia", "rb");
 
-	/**
-	 * iterate over all the lines in the file
-	 * 1. check if the line is empty (skip)
-	 * 2. check if the line contains a comment (ignore)
-	 * 3. check the name of the opcode
-	 * 4. retrieve the appropriate arguments to the operation
-	 */
-	
+    /**
+     * iterate over all the lines in the file
+     * 1. check if the line is empty (skip)
+     * 2. check if the line contains a comment (ignore)
+     * 3. check the name of the opcode
+     * 4. retrieve the appropriate arguments to the operation
+     */
 
-	fclose(file);
-	return 0;
+
+    fclose(file);
+    return 0;
 }

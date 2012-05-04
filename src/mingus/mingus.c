@@ -1,6 +1,6 @@
 /*
  Mingus Virtual Machine
- Copyright (C) 2008 Jo„o Magalh„es
+ Copyright (C) 2008 Jo√£o Magalh√£es
 
  This file is part of Mingus Virtual Machine.
 
@@ -17,11 +17,11 @@
  You should have received a copy of the GNU General Public License
  along with Mingus Virtual Machine. If not, see <http://www.gnu.org/licenses/>.
 
- __author__    = Jo„o Magalh„es <joamag@hive.pt>
+ __author__    = Jo√£o Magalh√£es <joamag@hive.pt>
  __version__   = 1.0.0
  __revision__  = $LastChangedRevision$
  __date__      = $LastChangedDate$
- __copyright__ = Copyright (c) 2008 Jo„o Magalh„es
+ __copyright__ = Copyright (c) 2008 Jo√£o Magalh√£es
  __license__   = GNU General Public License (GPL), Version 3
 */
 
