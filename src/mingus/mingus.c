@@ -35,7 +35,7 @@
  */
 unsigned int program[] = {
     0x00010064,
-    0x000101C8,
+    0x000101c8,
     0x00020201,
     0x00000000
 };
@@ -46,11 +46,11 @@ unsigned int mingusFetch(struct State_t *state) {
 
 void mingusDecode(struct State_t *state, unsigned int instruction) {
     /* populates the (current) instruction with the decoded values */
-    state->instruction.code = (instruction & 0xFFFF0000) >> 16;
-    state->instruction.reg1 = (instruction & 0x00000F00) >> 8;
-    state->instruction.reg2 = (instruction & 0x000000F0) >> 4;
-    state->instruction.reg3 = (instruction & 0x0000000F);
-    state->instruction.imediate = (instruction & 0x000000FF);
+    state->instruction.code = (instruction & 0xffff0000) >> 16;
+    state->instruction.reg1 = (instruction & 0x00000f00) >> 8;
+    state->instruction.reg2 = (instruction & 0x000000f0) >> 4;
+    state->instruction.reg3 = (instruction & 0x0000000f);
+    state->instruction.imediate = (instruction & 0x000000ff);
 }
 
 void mingusEval(struct State_t *state) {
@@ -114,8 +114,20 @@ void run() {
 	value (its a "normal" integer value, 32 bit)*/
     int instruction;
 
-    /* creates the virtual machine state */
-    struct State_t state = { 1, 0, program };
+	/* allocates sapce for the variable that will
+	hold the size of the bytecode buffer and for
+	the buffer that will hold the bytecode */
+	size_t size;
+	unsigned char *buffer;
+
+    /* creates the virtual machine state, no program
+	buffer is already set (defered loading) */
+    struct State_t state = { 1, 0, NULL };
+
+	/* reads the program file and sets the program
+	buffer in the state */
+	readFile("c:/calc.moc", &buffer, &size);
+	state.program = (unsigned int *) buffer;
 
     /* iterates while the running flag is set */
     while(state.running) {
