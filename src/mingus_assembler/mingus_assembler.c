@@ -40,15 +40,17 @@ typedef enum MingusStates_e {
 typedef enum MingusOpcodes_e {
 	UNSET_OPCODE = 1,
 	HALT,
-    LOAD,
+    LOADI,
 	ADD
 } MingusOpcodes;
 
 typedef struct MingusParser_t {
+	FILE *output;
 	enum MingusOpcodes_e opcode;
 	int reg1;
 	int reg2;
 	int reg3;
+	int immediate;
 	unsigned int instruction;
 } MingusParser;
 
@@ -84,6 +86,12 @@ typedef struct MingusParser_t {
 
 
 
+void putCode(unsigned int instruction, FILE *file) {
+	putc((instruction & 0x000000ff), file);
+	putc((instruction & 0x0000ff00) >> 8, file);
+	putc((instruction & 0x00ff0000) >> 16, file);
+	putc((instruction & 0xff000000) >> 24, file);
+}
 
 
 
@@ -97,12 +105,13 @@ int ontokenEnd(struct MingusParser_t *parser, unsigned char *pointer, size_t siz
 
 	if(parser->opcode == UNSET_OPCODE) {
 		parser->instruction = 0x00000000;
+		parser->reg1 = -1;
+		parser->reg2 = -1;
+		parser->reg3 = -1;
+		parser->immediate = -1;
 
 		if(strcmp(string, "loadi") == 0) {
-			parser->opcode = LOAD;
-			parser->reg1 = 0;
-			parser->reg2 = 0;
-			parser->reg3 = 0;
+			parser->opcode = LOADI;
 
 			parser->instruction |= 0x00010000;
 		} else if(strcmp(string, "add") == 0) {
@@ -113,6 +122,8 @@ int ontokenEnd(struct MingusParser_t *parser, unsigned char *pointer, size_t siz
 			parser->opcode = UNSET_OPCODE;
 
 			parser->instruction |= 0x00000000;
+			
+			putCode(parser->instruction, parser->output);
 
 			// flush instruction
 		}
@@ -121,12 +132,40 @@ int ontokenEnd(struct MingusParser_t *parser, unsigned char *pointer, size_t siz
 			case HALT:
 				break;
 
-			case LOAD:
-				
+			case LOADI:
+				if(parser->reg1 == -1) {
+					parser->reg1 = string[1] - 48;
+
+					parser->instruction |= parser->reg1 << 8;
+				} else if(parser->immediate == -1) {
+					parser->immediate = atoi(string);
+
+					parser->instruction |= parser->immediate;
+
+					parser->opcode = UNSET_OPCODE;
+					putCode(parser->instruction, parser->output);
+				}
 
 				break;
 
 			case ADD:
+				if(parser->reg1 == -1) {
+					parser->reg1 = string[1] - 48;
+
+					parser->instruction |= parser->reg1 << 8;
+				} else if(parser->reg2 == -1) {
+					parser->reg2 = string[1] - 48;
+
+					parser->instruction |= parser->reg2 << 4;
+				} else if(parser->reg3 == -1) {
+					parser->reg3 = string[1] - 48;
+
+					parser->instruction |= parser->reg3;
+
+					parser->opcode = UNSET_OPCODE;
+					putCode(parser->instruction, parser->output);
+				}
+
 				break;
 		}
 	}
@@ -166,6 +205,9 @@ int main(int argc, const char *argv[]) {
 
 	struct MingusParser_t parser;
 
+	FILE *out;
+
+
 	/* allocates space for the file structure to
 	hold the reference to be assembled */
     FILE *file;
@@ -184,6 +226,8 @@ int main(int argc, const char *argv[]) {
 	immediately in error */
 	if(file == NULL) { PRINTF("error reading file"); return 1; }
 
+	FOPEN(&out, "c:/calc.moc", "wb");
+
     /**
      * iterate over all the lines in the file
      * 1. check if the line is empty (skip)
@@ -200,6 +244,7 @@ int main(int argc, const char *argv[]) {
 	pointer = buffer;
 
 
+	parser.output = out;
 	parser.opcode = UNSET_OPCODE;
 
 
@@ -291,6 +336,13 @@ int main(int argc, const char *argv[]) {
 
 	/* releases the buffer, to avoid any memory leaking */
 	FREE(buffer);
+
+
+
+
+
+    fclose(out);
+
 
 	/* closes the file (all the parsing has been done) 
 	the output has been generated */
