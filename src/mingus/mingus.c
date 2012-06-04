@@ -61,7 +61,7 @@ void mingusEval(struct State_t *state) {
     switch(instruction->code) {
         /* in case it's the halt instruction */
         case 0:
-            printf("halt\n");
+            PRINTF("halt\n");
 
             /* unsets the runnig flag */
             state->running = 0;
@@ -71,7 +71,7 @@ void mingusEval(struct State_t *state) {
 
         /* in case it's the loadi instruction */
         case 1:
-            printf("loadi r%d #%d\n", instruction->reg1, instruction->imediate);
+            PRINTF_F("loadi r%d #%d\n", instruction->reg1, instruction->imediate);
 
             /* sets the integer in the register */
             state->registers[instruction->reg1] = instruction->imediate;
@@ -81,7 +81,7 @@ void mingusEval(struct State_t *state) {
 
         /* in case it's the add instruction */
         case 2:
-            printf("add r%d r%d r%d\n", instruction->reg1, instruction->reg2, instruction->reg3);
+            PRINTF_F("add r%d r%d r%d\n", instruction->reg1, instruction->reg2, instruction->reg3);
 
             /* sums both registers and puts the result
             in the third register */
@@ -97,20 +97,21 @@ void showRegisters(struct State_t *state) {
     int index;
 
     /* prints the initial line */
-    printf("regs = ");
+    PRINTF("regs => ");
 
     /* iterates over all the registers */
     for(index = 0; index < NUMBER_REGISTERS; index++) {
         /* prints the register information */
-        printf("%04X ", state->registers[index]);
+        PRINTF_F("%04X ", state->registers[index]);
     }
 
     /* prints the newline */
-    printf( "\n" );
+    PRINTF("\n");
 }
 
 void run() {
-    /* allocates the instruction */
+    /* allocates the space for the instruction
+	value (its a "normal" integer value, 32 bit)*/
     int instruction;
 
     /* creates the virtual machine state */
@@ -118,17 +119,15 @@ void run() {
 
     /* iterates while the running flag is set */
     while(state.running) {
-        /* shows the registers */
+        /* shows the registers, to the default output
+		buffer (standard output) */
         showRegisters(&state);
 
-        /* fetches the next instruction */
+        /* fetches the next instruction, decodes it into
+		the intruction and then evalutates the current state */
         instruction = mingusFetch(&state);
-
-        /* decodes the instruction */
-        mingusDecode(&state, instruction);
-
-        /* evaluates the current state */
-        mingusEval(&state);
+		mingusDecode(&state, instruction);
+		mingusEval(&state);
     }
 
     /* shows the registers */
