@@ -34,10 +34,10 @@
  * to be executed for testing.
  */
 unsigned int program[] = {
-    0x1064,
-    0x11C8,
-    0x2201,
-    0x0000
+    0x00010064,
+    0x000101C8,
+    0x00020201,
+    0x00000000
 };
 
 unsigned int mingusFetch(struct State_t *state) {
@@ -46,11 +46,11 @@ unsigned int mingusFetch(struct State_t *state) {
 
 void mingusDecode(struct State_t *state, unsigned int instruction) {
     /* populates the (current) instruction with the decoded values */
-    state->instruction.code = (instruction & 0xF000) >> 12;
-    state->instruction.reg1 = (instruction & 0x0F00) >> 8;
-    state->instruction.reg2 = (instruction & 0x00F0) >> 4;
-    state->instruction.reg3 = (instruction & 0x000F);
-    state->instruction.imediate = (instruction & 0x00FF);
+    state->instruction.code = (instruction & 0xFFFF0000) >> 16;
+    state->instruction.reg1 = (instruction & 0x00000F00) >> 8;
+    state->instruction.reg2 = (instruction & 0x000000F0) >> 4;
+    state->instruction.reg3 = (instruction & 0x0000000F);
+    state->instruction.imediate = (instruction & 0x000000FF);
 }
 
 void mingusEval(struct State_t *state) {
@@ -71,7 +71,7 @@ void mingusEval(struct State_t *state) {
 
         /* in case it's the loadi instruction */
         case 1:
-            PRINTF_F("loadi r%d #%d\n", instruction->reg1, instruction->imediate);
+            PRINTF_F("loadi r%d #%08x\n", instruction->reg1, instruction->imediate);
 
             /* sets the integer in the register */
             state->registers[instruction->reg1] = instruction->imediate;
@@ -102,7 +102,7 @@ void showRegisters(struct State_t *state) {
     /* iterates over all the registers */
     for(index = 0; index < NUMBER_REGISTERS; index++) {
         /* prints the register information */
-        PRINTF_F("%04X ", state->registers[index]);
+        PRINTF_F("%08x ", state->registers[index]);
     }
 
     /* prints the newline */
