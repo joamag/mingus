@@ -32,26 +32,26 @@
  * states for the mingus assembler parser.
  */
 typedef enum MingusStates_e {
-	NORMAL = 1,
+    NORMAL = 1,
     TOKEN,
-	COMMENT
+    COMMENT
 } MingusStates;
 
 typedef enum MingusOpcodes_e {
-	UNSET_OPCODE = 1,
-	HALT,
+    UNSET_OPCODE = 1,
+    HALT,
     LOADI,
-	ADD
+    ADD
 } MingusOpcodes;
 
 typedef struct MingusParser_t {
-	FILE *output;
-	enum MingusOpcodes_e opcode;
-	int reg1;
-	int reg2;
-	int reg3;
-	int immediate;
-	unsigned int instruction;
+    FILE *output;
+    enum MingusOpcodes_e opcode;
+    int reg1;
+    int reg2;
+    int reg3;
+    int immediate;
+    unsigned int instruction;
 } MingusParser;
 
 #define MINGUS_MARK(FOR) MINGUS_MARK_N(FOR, 0)
@@ -87,10 +87,10 @@ typedef struct MingusParser_t {
 
 
 void putCode(unsigned int instruction, FILE *file) {
-	putc((instruction & 0x000000ff), file);
-	putc((instruction & 0x0000ff00) >> 8, file);
-	putc((instruction & 0x00ff0000) >> 16, file);
-	putc((instruction & 0xff000000) >> 24, file);
+    putc((instruction & 0x000000ff), file);
+    putc((instruction & 0x0000ff00) >> 8, file);
+    putc((instruction & 0x00ff0000) >> 16, file);
+    putc((instruction & 0xff000000) >> 24, file);
 }
 
 
@@ -99,90 +99,90 @@ void putCode(unsigned int instruction, FILE *file) {
 
 
 int ontokenEnd(struct MingusParser_t *parser, unsigned char *pointer, size_t size) {
-	char *string = MALLOC(size + 1);
-	memcpy(string, pointer, size);
-	string[size] = '\0';
+    char *string = MALLOC(size + 1);
+    memcpy(string, pointer, size);
+    string[size] = '\0';
 
-	if(parser->opcode == UNSET_OPCODE) {
-		parser->instruction = 0x00000000;
-		parser->reg1 = -1;
-		parser->reg2 = -1;
-		parser->reg3 = -1;
-		parser->immediate = -1;
+    if(parser->opcode == UNSET_OPCODE) {
+        parser->instruction = 0x00000000;
+        parser->reg1 = -1;
+        parser->reg2 = -1;
+        parser->reg3 = -1;
+        parser->immediate = -1;
 
-		if(strcmp(string, "loadi") == 0) {
-			parser->opcode = LOADI;
+        if(strcmp(string, "loadi") == 0) {
+            parser->opcode = LOADI;
 
-			parser->instruction |= 0x00010000;
-		} else if(strcmp(string, "add") == 0) {
-			parser->opcode = ADD;
+            parser->instruction |= 0x00010000;
+        } else if(strcmp(string, "add") == 0) {
+            parser->opcode = ADD;
 
-			parser->instruction |= 0x00020000;
-		} else if(strcmp(string, "halt") == 0) {
-			parser->opcode = UNSET_OPCODE;
+            parser->instruction |= 0x00020000;
+        } else if(strcmp(string, "halt") == 0) {
+            parser->opcode = UNSET_OPCODE;
 
-			parser->instruction |= 0x00000000;
-			
-			putCode(parser->instruction, parser->output);
+            parser->instruction |= 0x00000000;
 
-			// flush instruction
-		}
-	} else {
-		switch(parser->opcode) {
-			case HALT:
-				break;
+            putCode(parser->instruction, parser->output);
 
-			case LOADI:
-				if(parser->reg1 == -1) {
-					parser->reg1 = string[1] - 48;
+            // flush instruction
+        }
+    } else {
+        switch(parser->opcode) {
+            case HALT:
+                break;
 
-					parser->instruction |= parser->reg1 << 8;
-				} else if(parser->immediate == -1) {
-					parser->immediate = atoi(string);
+            case LOADI:
+                if(parser->reg1 == -1) {
+                    parser->reg1 = string[1] - 48;
 
-					parser->instruction |= parser->immediate;
+                    parser->instruction |= parser->reg1 << 8;
+                } else if(parser->immediate == -1) {
+                    parser->immediate = atoi(string);
 
-					parser->opcode = UNSET_OPCODE;
-					putCode(parser->instruction, parser->output);
-				}
+                    parser->instruction |= parser->immediate;
 
-				break;
+                    parser->opcode = UNSET_OPCODE;
+                    putCode(parser->instruction, parser->output);
+                }
 
-			case ADD:
-				if(parser->reg1 == -1) {
-					parser->reg1 = string[1] - 48;
+                break;
 
-					parser->instruction |= parser->reg1 << 8;
-				} else if(parser->reg2 == -1) {
-					parser->reg2 = string[1] - 48;
+            case ADD:
+                if(parser->reg1 == -1) {
+                    parser->reg1 = string[1] - 48;
 
-					parser->instruction |= parser->reg2 << 4;
-				} else if(parser->reg3 == -1) {
-					parser->reg3 = string[1] - 48;
+                    parser->instruction |= parser->reg1 << 8;
+                } else if(parser->reg2 == -1) {
+                    parser->reg2 = string[1] - 48;
 
-					parser->instruction |= parser->reg3;
+                    parser->instruction |= parser->reg2 << 4;
+                } else if(parser->reg3 == -1) {
+                    parser->reg3 = string[1] - 48;
 
-					parser->opcode = UNSET_OPCODE;
-					putCode(parser->instruction, parser->output);
-				}
+                    parser->instruction |= parser->reg3;
 
-				break;
-		}
-	}
+                    parser->opcode = UNSET_OPCODE;
+                    putCode(parser->instruction, parser->output);
+                }
 
-	printf("TOKEN -> '%s'\n", string);
+                break;
+        }
+    }
 
-	return 0;
+    printf("TOKEN -> '%s'\n", string);
+
+    return 0;
 }
 
 int oncommentEnd(struct MingusParser_t *parser, unsigned char *pointer, size_t size) {
-	char *string = MALLOC(size + 1);
-	memcpy(string, pointer, size);
-	string[size] = '\0';
+    char *string = MALLOC(size + 1);
+    memcpy(string, pointer, size);
+    string[size] = '\0';
 
-	printf("COMMENT -> '%s'\n", string);
+    printf("COMMENT -> '%s'\n", string);
 
-	return 0;
+    return 0;
 }
 
 
@@ -191,42 +191,42 @@ int oncommentEnd(struct MingusParser_t *parser, unsigned char *pointer, size_t s
 
 
 int main(int argc, const char *argv[]) {
-	/* allocates space for the byte to be used
-	durring the parsing of the file */
-	char byte;
+    /* allocates space for the byte to be used
+    durring the parsing of the file */
+    char byte;
 
 
-	size_t fileSize;
+    size_t fileSize;
 
-	char *buffer;
-	char *pointer;
-	char *tokenEndMark;
-	char *commentEndMark;
+    char *buffer;
+    char *pointer;
+    char *tokenEndMark;
+    char *commentEndMark;
 
-	struct MingusParser_t parser;
+    struct MingusParser_t parser;
 
-	FILE *out;
+    FILE *out;
 
 
-	/* allocates space for the file structure to
-	hold the reference to be assembled */
+    /* allocates space for the file structure to
+    hold the reference to be assembled */
     FILE *file;
 
-	/* starts the parser initial state as the
-	normal state in between operations */
-	enum MingusStates_e state = NORMAL;
+    /* starts the parser initial state as the
+    normal state in between operations */
+    enum MingusStates_e state = NORMAL;
 
-	/* counts the number of bytes in the asm file
-	and then opens the asm file to be assembled in
-	binary mode (required for parsing) */
-	countFile("c:/calc.mia", &fileSize);
+    /* counts the number of bytes in the asm file
+    and then opens the asm file to be assembled in
+    binary mode (required for parsing) */
+    countFile("c:/calc.mia", &fileSize);
     FOPEN(&file, "c:/calc.mia", "rb");
 
-	/* in case the file could not be read, returns
-	immediately in error */
-	if(file == NULL) { PRINTF("error reading file"); return 1; }
+    /* in case the file could not be read, returns
+    immediately in error */
+    if(file == NULL) { PRINTF("error reading file"); return 1; }
 
-	FOPEN(&out, "c:/calc.moc", "wb");
+    FOPEN(&out, "c:/calc.moc", "wb");
 
     /**
      * iterate over all the lines in the file
@@ -236,106 +236,106 @@ int main(int argc, const char *argv[]) {
      * 4. retrieve the appropriate arguments to the operation
      */
 
-	/* allocates the required size to read the complete file
-	and then reads it completly */
-	buffer = (char *) MALLOC(fileSize);
-	fread(buffer, 1, fileSize, file);
-		
-	pointer = buffer;
+    /* allocates the required size to read the complete file
+    and then reads it completly */
+    buffer = (char *) MALLOC(fileSize);
+    fread(buffer, 1, fileSize, file);
+
+    pointer = buffer;
 
 
-	parser.output = out;
-	parser.opcode = UNSET_OPCODE;
+    parser.output = out;
+    parser.opcode = UNSET_OPCODE;
 
 
-	/* iterates continuously over the file buffer to
-	parse the file and generate the output */
-	while(1) {
-		/* checks if the pointer did not overflow the
-		current buffer itartion, in case it not retrieves
-		the current byte as the byte pointed */
-		if(pointer == buffer + fileSize) { break; }
-		byte = *pointer;
+    /* iterates continuously over the file buffer to
+    parse the file and generate the output */
+    while(1) {
+        /* checks if the pointer did not overflow the
+        current buffer itartion, in case it not retrieves
+        the current byte as the byte pointed */
+        if(pointer == buffer + fileSize) { break; }
+        byte = *pointer;
 
-		/* switches over the current state of the parser
-		to operate accordingly over the current buffer */
-		switch(state) {
-			case NORMAL:
-				switch(byte) {
-					case ';':
-						state = COMMENT;
+        /* switches over the current state of the parser
+        to operate accordingly over the current buffer */
+        switch(state) {
+            case NORMAL:
+                switch(byte) {
+                    case ';':
+                        state = COMMENT;
 
-						MINGUS_MARK(commentEnd);
+                        MINGUS_MARK(commentEnd);
 
-						/* breaks the switch */
-						break;
+                        /* breaks the switch */
+                        break;
 
-					case ' ':
-					case '\r':
-					case '\n':
-						/* breaks the switch */
-						break;
+                    case ' ':
+                    case '\r':
+                    case '\n':
+                        /* breaks the switch */
+                        break;
 
-					default:
-						state = TOKEN;
+                    default:
+                        state = TOKEN;
 
-						MINGUS_MARK(tokenEnd);
+                        MINGUS_MARK(tokenEnd);
 
-						/* breaks the switch */
-						break;
-				}
+                        /* breaks the switch */
+                        break;
+                }
 
-				/* breaks the switch */
-				break;
+                /* breaks the switch */
+                break;
 
-			case TOKEN:
-				switch(byte) {
-					case ' ':
-					case '\r':
-					case '\n':
-						state = NORMAL;
+            case TOKEN:
+                switch(byte) {
+                    case ' ':
+                    case '\r':
+                    case '\n':
+                        state = NORMAL;
 
-						MINGUS_CALLBACK_DATA(tokenEnd);
+                        MINGUS_CALLBACK_DATA(tokenEnd);
 
-						/* breaks the switch */
-						break;
+                        /* breaks the switch */
+                        break;
 
-					default:
-						/* breaks the switch */
-						break;
-				}
+                    default:
+                        /* breaks the switch */
+                        break;
+                }
 
-				/* breaks the switch */
-				break;
+                /* breaks the switch */
+                break;
 
-			case COMMENT:
-				switch(byte) {
-					case '\r':
-					case '\n':
-						state = NORMAL;
+            case COMMENT:
+                switch(byte) {
+                    case '\r':
+                    case '\n':
+                        state = NORMAL;
 
-						MINGUS_CALLBACK_DATA(commentEnd);
+                        MINGUS_CALLBACK_DATA(commentEnd);
 
-						/* breaks the switch */
-						break;
+                        /* breaks the switch */
+                        break;
 
-					default:
-						/* breaks the switch */
-						break;
-				}
+                    default:
+                        /* breaks the switch */
+                        break;
+                }
 
 
-				/* breaks the switch */
-				break;
-		}
+                /* breaks the switch */
+                break;
+        }
 
-		/* increments the current buffer pointer
-		iteration end operation */
-		pointer++;
-	}
+        /* increments the current buffer pointer
+        iteration end operation */
+        pointer++;
+    }
 
-	/* releases the buffer, to avoid any memory leaking */
-	FREE(buffer);
+    /* releases the buffer, to avoid any memory leaking */
+    FREE(buffer);
 
 
 
@@ -344,8 +344,8 @@ int main(int argc, const char *argv[]) {
     fclose(out);
 
 
-	/* closes the file (all the parsing has been done) 
-	the output has been generated */
+    /* closes the file (all the parsing has been done)
+    the output has been generated */
     fclose(file);
 
     return 0;

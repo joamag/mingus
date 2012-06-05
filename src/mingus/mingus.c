@@ -111,35 +111,35 @@ void showRegisters(struct State_t *state) {
 
 void run() {
     /* allocates the space for the instruction
-	value (its a "normal" integer value, 32 bit)*/
+    value (its a "normal" integer value, 32 bit)*/
     int instruction;
 
-	/* allocates sapce for the variable that will
-	hold the size of the bytecode buffer and for
-	the buffer that will hold the bytecode */
-	size_t size;
-	unsigned char *buffer;
+    /* allocates sapce for the variable that will
+    hold the size of the bytecode buffer and for
+    the buffer that will hold the bytecode */
+    size_t size;
+    unsigned char *buffer;
 
     /* creates the virtual machine state, no program
-	buffer is already set (defered loading) */
+    buffer is already set (defered loading) */
     struct State_t state = { 1, 0, NULL };
 
-	/* reads the program file and sets the program
-	buffer in the state */
-	readFile("c:/calc.moc", &buffer, &size);
-	state.program = (unsigned int *) buffer;
+    /* reads the program file and sets the program
+    buffer in the state */
+    readFile("c:/calc.moc", &buffer, &size);
+    state.program = (unsigned int *) buffer;
 
     /* iterates while the running flag is set */
     while(state.running) {
         /* shows the registers, to the default output
-		buffer (standard output) */
+        buffer (standard output) */
         showRegisters(&state);
 
         /* fetches the next instruction, decodes it into
-		the intruction and then evalutates the current state */
+        the intruction and then evalutates the current state */
         instruction = mingusFetch(&state);
-		mingusDecode(&state, instruction);
-		mingusEval(&state);
+        mingusDecode(&state, instruction);
+        mingusEval(&state);
     }
 
     /* shows the registers */
