@@ -75,10 +75,8 @@ typedef struct MingusParser_t {
 #define MINGUS_CALLBACK_DATA_N(FOR, N)\
     do {\
         if(FOR##Mark) {\
-            if(on##FOR) {\
-                if(on##FOR(&parser, FOR##Mark, pointer - FOR##Mark - N) != 0) {\
-                    RAISE_ERROR_M(RUNTIME_EXCEPTION_ERROR_CODE, (unsigned char *) "Problem handling callback"); \
-                }\
+            if(on##FOR(&parser, FOR##Mark, pointer - FOR##Mark - N) != 0) {\
+                RAISE_ERROR_M(RUNTIME_EXCEPTION_ERROR_CODE, (unsigned char *) "Problem handling callback"); \
             }\
             FOR##Mark = NULL;\
         }\
@@ -93,12 +91,7 @@ void putCode(unsigned int instruction, FILE *file) {
     putc((instruction & 0xff000000) >> 24, file);
 }
 
-
-
-
-
-
-int ontokenEnd(struct MingusParser_t *parser, unsigned char *pointer, size_t size) {
+int ontokenEnd(struct MingusParser_t *parser, char *pointer, size_t size) {
     char *string = MALLOC(size + 1);
     memcpy(string, pointer, size);
     string[size] = '\0';
@@ -175,7 +168,7 @@ int ontokenEnd(struct MingusParser_t *parser, unsigned char *pointer, size_t siz
     return 0;
 }
 
-int oncommentEnd(struct MingusParser_t *parser, unsigned char *pointer, size_t size) {
+int oncommentEnd(struct MingusParser_t *parser, char *pointer, size_t size) {
     char *string = MALLOC(size + 1);
     memcpy(string, pointer, size);
     string[size] = '\0';
