@@ -27,6 +27,8 @@
 
 #include "stdafx.h"
 
+#define _UNDEFINED -127
+
 /**
  * Enumeration defining all the possible
  * states for the mingus assembler parser.
@@ -37,21 +39,12 @@ typedef enum MingusStates_e {
     COMMENT
 } MingusStates;
 
-typedef enum MingusOpcodes_e {
-    UNSET_OPCODE = 1,
-    HALT,
-    LOADI,
-    ADD
-} MingusOpcodes;
-
 typedef struct MingusParser_t {
     FILE *output;
-    enum MingusOpcodes_e opcode;
-    int reg1;
-    int reg2;
-    int reg3;
-    int immediate;
-    unsigned int instruction;
+	size_t instructionCount;
+    struct Instruction_t *instruction;
+	struct Instruction_t instructions[1024];
+	struct HashMap_t *labels;
 } MingusParser;
 
 #define MINGUS_MARK(FOR) MINGUS_MARK_N(FOR, 0)
@@ -96,65 +89,117 @@ ERROR_CODE ontokenEnd(struct MingusParser_t *parser, char *pointer, size_t size)
     memcpy(string, pointer, size);
     string[size] = '\0';
 
-    if(parser->opcode == UNSET_OPCODE) {
-        parser->instruction = 0x00000000;
-        parser->reg1 = -1;
-        parser->reg2 = -1;
-        parser->reg3 = -1;
-        parser->immediate = -1;
+	if(string[0] == '.') {
+		/* its's a section changer */
+	}
+	/* otherwise in case the last character in the string is a
+	colon this token is considered to be a label */
+	else if(string[size - 1] == ':') {
+		string[size - 1] = '\0';
+		setValueStringHashMap(parser->labels, string, (void *) parser->instructionCount);
+	}
+	/* otherwise it's considered to be an opcode reference
+	and should be processed normally */
+	else if(parser->instruction == NULL) {
+		/* sets the current instruction pointer in the
+		parser for correct execution */
+		parser->instruction = &parser->instructions[parser->instructionCount];
 
-        if(strcmp(string, "loadi") == 0) {
-            parser->opcode = LOADI;
+		/* increments the number of instruction processed
+		(this is the instruction counteter) */
+		parser->instructionCount++;
 
-            parser->instruction |= 0x00010000;
-        } else if(strcmp(string, "add") == 0) {
-            parser->opcode = ADD;
+        parser->instruction->code = 0x00000000;
+		parser->instruction->opcode = UNSET_OPCODE;
+        parser->instruction->arg1 = _UNDEFINED;
+        parser->instruction->arg2 = _UNDEFINED;
+        parser->instruction->arg3 = _UNDEFINED;
+        parser->instruction->immediate = _UNDEFINED;
+		parser->instruction->position = parser->instructionCount;
 
-            parser->instruction |= 0x00020000;
+		if(strcmp(string, "load") == 0) {
+            parser->instruction->opcode = LOAD;
+            parser->instruction->code |= LOAD << 16;
+        } else if(strcmp(string, "loadi") == 0) {
+            parser->instruction->opcode = LOADI;
+            parser->instruction->code |= LOADI << 16;
+        } else if(strcmp(string, "store") == 0) {
+            parser->instruction->opcode = STORE;
+            parser->instruction->code |= STORE << 16;
+		} else if(strcmp(string, "add") == 0) {
+			parser->instruction->opcode = ADD;
+            parser->instruction->code |= ADD << 16;
+			parser->instruction = NULL;
+		} else if(strcmp(string, "sub") == 0) {
+			parser->instruction->opcode = SUB;
+            parser->instruction->code |= SUB << 16;
+			parser->instruction = NULL;
+		} else if(strcmp(string, "pop") == 0) {
+			parser->instruction->opcode = POP;
+            parser->instruction->code |= POP << 16;
+			parser->instruction = NULL;
+        } else if(strcmp(string, "cmp") == 0) {
+            parser->instruction->opcode = CMP;
+            parser->instruction->code |= CMP << 16;
+        } else if(strcmp(string, "jmp") == 0) {
+            parser->instruction->opcode = JMP;
+            parser->instruction->code |= JMP << 16;
+        } else if(strcmp(string, "jmp_eq") == 0) {
+            parser->instruction->opcode = JMP_EQ;
+            parser->instruction->code |= JMP_EQ << 16;
+        } else if(strcmp(string, "jmp_neq") == 0) {
+            parser->instruction->opcode = JMP_NEQ;
+            parser->instruction->code |= JMP_NEQ << 16;
+        } else if(strcmp(string, "jmp_abs") == 0) {
+            parser->instruction->opcode = JMP_ABS;
+            parser->instruction->code |= JMP_ABS << 16;
+		} else if(strcmp(string, "print") == 0)  {
+			parser->instruction->opcode = PRINT;
+            parser->instruction->code |= PRINT << 16;
+			parser->instruction = NULL;
         } else if(strcmp(string, "halt") == 0) {
-            parser->opcode = UNSET_OPCODE;
-
-            parser->instruction |= 0x00000000;
-
-            putCode(parser->instruction, parser->output);
+			parser->instruction->opcode = HALT;
+            parser->instruction->code |= HALT << 16;
+			parser->instruction = NULL;
         }
     } else {
-        switch(parser->opcode) {
+        switch(parser->instruction->opcode) {
             case HALT:
                 break;
 
+			case LOAD:
             case LOADI:
-                if(parser->reg1 == -1) {
-                    parser->reg1 = string[1] - 48;
+			case STORE:
+				if(parser->instruction->immediate == _UNDEFINED) {
+                    parser->instruction->immediate = atoi(string);
 
-                    parser->instruction |= parser->reg1 << 8;
-                } else if(parser->immediate == -1) {
-                    parser->immediate = atoi(string);
+                    parser->instruction->code |= (unsigned char) parser->instruction->immediate;
 
-                    parser->instruction |= parser->immediate;
+                    parser->instruction = NULL;
+                }
 
-                    parser->opcode = UNSET_OPCODE;
-                    putCode(parser->instruction, parser->output);
+				break;
+
+			case JMP:
+			case JMP_EQ:
+                if(parser->instruction->immediate == _UNDEFINED) {
+					memcpy(parser->instruction->string, string, size + 1);
+                    parser->instruction = NULL;
                 }
 
                 break;
 
             case ADD:
-                if(parser->reg1 == -1) {
-                    parser->reg1 = string[1] - 48;
+			case SUB:
+                break;
 
-                    parser->instruction |= parser->reg1 << 8;
-                } else if(parser->reg2 == -1) {
-                    parser->reg2 = string[1] - 48;
+            case CMP:
+                if(parser->instruction->arg1 == _UNDEFINED) {
+                    parser->instruction->arg1 = atoi(string);
 
-                    parser->instruction |= parser->reg2 << 4;
-                } else if(parser->reg3 == -1) {
-                    parser->reg3 = string[1] - 48;
+                    parser->instruction->code |= parser->instruction->arg1 << 8;
 
-                    parser->instruction |= parser->reg3;
-
-                    parser->opcode = UNSET_OPCODE;
-                    putCode(parser->instruction, parser->output);
+                    parser->instruction = NULL;
                 }
 
                 break;
@@ -188,7 +233,7 @@ int main(int argc, const char *argv[]) {
     durring the parsing of the file */
     char byte;
 
-
+	size_t index;
     size_t fileSize;
 
     char *buffer;
@@ -238,7 +283,11 @@ int main(int argc, const char *argv[]) {
 	/* updates the parser structure setting the appropriate
 	output file (buffer) and the initial opcode value */
     parser.output = out;
-    parser.opcode = UNSET_OPCODE;
+	parser.instruction = NULL;
+	parser.instructionCount = 0;
+
+	/* creates the hash map to hold the various labels */
+	createHashMap(&parser.labels, 0);
 
     /* iterates continuously over the file buffer to
     parse the file and generate the output */
@@ -324,6 +373,27 @@ int main(int argc, const char *argv[]) {
         iteration end operation */
         pointer++;
     }
+
+	for(index = 0; index < parser.instructionCount; index++) {
+		/* sets the current instruction pointer in the
+		parser for correct execution */
+		parser.instruction = &parser.instructions[index];
+
+		switch(parser.instruction->opcode) {
+			case JMP:
+			case JMP_EQ:
+                getValueStringHashMap(parser.labels, parser.instruction->string, (void **) &parser.instruction->immediate);
+				parser.instruction->code |= (unsigned char) (parser.instruction->immediate - parser.instruction->position);
+
+                break;
+		}
+
+		putCode(parser.instruction->code, parser.output);
+	}
+
+	/* prints a logging message indicating the results
+	of the assembling */
+	PRINTF_F("Processed %d instructions...\n", parser.instructionCount);
 
     /* releases the buffer, to avoid any memory leaking */
     FREE(buffer);

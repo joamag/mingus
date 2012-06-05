@@ -33,3 +33,5 @@
 #include <tchar.h>
 
 #include <viriatum/viriatum.h>
+
+#include "../mingus/mingus.h"
