@@ -27,6 +27,10 @@
 
 #include "stdafx.h"
 
+/**
+ * The undefined value for any byte wide
+ * value (single value).
+ */
 #define _UNDEFINED -127
 
 /**
@@ -82,6 +86,10 @@ void putCode(unsigned int instruction, FILE *file) {
     putc((instruction & 0x0000ff00) >> 8, file);
     putc((instruction & 0x00ff0000) >> 16, file);
     putc((instruction & 0xff000000) >> 24, file);
+}
+
+void putBuffer(char *buffer, size_t size, FILE *file) {
+	fwrite(buffer, 1, size, file);
 }
 
 ERROR_CODE ontokenEnd(struct MingusParser_t *parser, char *pointer, size_t size) {
@@ -241,6 +249,7 @@ int main(int argc, const char *argv[]) {
     char *tokenEndMark;
     char *commentEndMark;
 
+	struct Code_t code;
     struct MingusParser_t parser;
 
     FILE *out;
@@ -373,6 +382,13 @@ int main(int argc, const char *argv[]) {
         iteration end operation */
         pointer++;
     }
+
+	memcpy(code.header.magic, "MING", 4);
+	code.header.version = MINGUS_CODE_VERSION;
+	code.header.dataSize = 0;
+	code.header.codeSize = parser.instructionCount * sizeof(int);
+
+	putBuffer((char *) &code.header, sizeof(struct CodeHeader_t), parser.output);
 
 	for(index = 0; index < parser.instructionCount; index++) {
 		/* sets the current instruction pointer in the
