@@ -26,21 +26,51 @@
 */
 
 /**
- * The number of existing registers in the
- * virtual machine.
+ * The size of the stack to be used in the
+ * runtime of the virtual machine.
  */
-#define NUMBER_REGISTERS 4
+#define STACK_SIZE 4096
+
+/**
+ * The size of the map of local references to
+ * the variables.
+ */
+#define LOCALS_SIZE 512
+
+/**
+ * Enumeration defining all the opcodes for
+ * the various mingus operations.
+ */
+typedef enum Opcodes_e {
+    UNSET_OPCODE = -1,
+    HALT,
+	LOAD,
+    LOADI,
+	STORE,
+    ADD,
+	SUB,
+	POP,
+	CMP,
+	JMP,
+	JMP_EQ,
+	JMP_NEQ,
+	JMP_ABS,
+	PRINT
+} Opcodes;
 
 /**
  * Structure describing a general instruction
  * for the mingus virtual machine.
  */
 typedef struct Instruction_t {
-    unsigned int code;
-    int reg1;
-    int reg2;
-    int reg3;
-    int imediate;
+	int code;
+    enum Opcodes_e opcode;
+    char arg1;
+    char arg2;
+    char arg3;
+    char immediate;
+	char string[128];
+	unsigned int position;
 } Instruction;
 
 /**
@@ -50,8 +80,10 @@ typedef struct Instruction_t {
 typedef struct State_t {
     unsigned int running;
     unsigned int pc;
+	unsigned int sp;
     unsigned int *program;
-    int registers[NUMBER_REGISTERS];
+	int stack[STACK_SIZE];
+	int locals[LOCALS_SIZE];
     struct Instruction_t instruction;
 } State;
 
