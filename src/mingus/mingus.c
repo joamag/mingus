@@ -60,7 +60,7 @@ void mingusEval(struct State_t *state) {
 
 			/* verifies the condition for the instruction
 			execution without any problem */
-			assert(state->sp == 0);
+			assert(state->so == 0);
 
             /* unsets the runnig flag */
             state->running = 0;
@@ -72,8 +72,8 @@ void mingusEval(struct State_t *state) {
         case LOAD:
 			V_DEBUG_F("load #%08x (#%08x)\n", instruction->immediate, state->locals[instruction->immediate]);
 
-            state->stack[state->sp] = state->locals[instruction->immediate];
-			state->sp++;
+            state->stack[state->so] = state->locals[instruction->immediate];
+			state->so++;
 
             /* breaks the switch */
             break;
@@ -84,97 +84,97 @@ void mingusEval(struct State_t *state) {
 
             /* sets the integer in the top of stack and then
 			increments the current stack pointer */
-            state->stack[state->sp] = instruction->immediate;
-			state->sp++;
+            state->stack[state->so] = instruction->immediate;
+			state->so++;
 
             /* breaks the switch */
             break;
 
         /* in case it's the store instruction */
         case STORE:
-			V_DEBUG_F("store #%08x #%08x\n", instruction->immediate, state->stack[state->sp - 1]);
+			V_DEBUG_F("store #%08x #%08x\n", instruction->immediate, state->stack[state->so - 1]);
 
 			/* verifies the condition for the instruction
 			execution without any problem */
-			assert(state->sp > 0);
+			assert(state->so > 0);
 
-			state->locals[instruction->immediate] = state->stack[state->sp - 1];
-			state->sp--;
+			state->locals[instruction->immediate] = state->stack[state->so - 1];
+			state->so--;
 
             /* breaks the switch */
             break;
 
         /* in case it's the add instruction */
         case ADD:
-			V_DEBUG_F("add #%08x #%08x\n", state->stack[state->sp - 2], state->stack[state->sp - 1]);
+			V_DEBUG_F("add #%08x #%08x\n", state->stack[state->so - 2], state->stack[state->so - 1]);
 
 			/* verifies the condition for the instruction
 			execution without any problem */
-			assert(state->sp > 1);
+			assert(state->so > 1);
 
 			/* retrieves both operands from the stack and then pops
 			both elements from it */
-			operand1 = state->stack[state->sp - 2];
-			operand2 = state->stack[state->sp - 1];
-			state->sp -= 2;
+			operand1 = state->stack[state->so - 2];
+			operand2 = state->stack[state->so - 1];
+			state->so -= 2;
 
             /* adds the values on top of the stack and then
 			sets the sum in the top of the stack */
-            state->stack[state->sp] = operand1 + operand2;
-			state->sp++;
+            state->stack[state->so] = operand1 + operand2;
+			state->so++;
 			
             /* breaks the switch */
             break;
 
         /* in case it's the sub instruction */
         case SUB:
-			V_DEBUG_F("sub #%08x #%08x\n", state->stack[state->sp - 2], state->stack[state->sp - 1]);
+			V_DEBUG_F("sub #%08x #%08x\n", state->stack[state->so - 2], state->stack[state->so - 1]);
 
 			/* verifies the condition for the instruction
 			execution without any problem */
-			assert(state->sp > 1);
+			assert(state->so > 1);
 
 			/* retrieves both operands from the stack and then pops
 			both elements from it */
-			operand1 = state->stack[state->sp - 2];
-			operand2 = state->stack[state->sp - 1];
-			state->sp -= 2;
+			operand1 = state->stack[state->so - 2];
+			operand2 = state->stack[state->so - 1];
+			state->so -= 2;
 
             /* adds the values on top of the stack and then
 			sets the sum in the top of the stack */
-            state->stack[state->sp] = operand1 - operand2;
-			state->sp++;
+            state->stack[state->so] = operand1 - operand2;
+			state->so++;
 			
             /* breaks the switch */
             break;
 
         /* in case it's the pop instruction */
         case POP:
-			V_DEBUG_F("pop #%08x\n", state->stack[state->sp - 1]);
+			V_DEBUG_F("pop #%08x\n", state->stack[state->so - 1]);
 
 			/* verifies the condition for the instruction
 			execution without any problem */
-			assert(state->sp > 0);
+			assert(state->so > 0);
 
 			/* pops the top element from the stack */
-			state->sp--;
+			state->so--;
 			
             /* breaks the switch */
             break;
 
 		/* in case it's the cmp operation */
 		case CMP:
-			V_DEBUG_F("cmp '%s' #%08x #%08x\n", operands[instruction->arg1], state->stack[state->sp - 2], state->stack[state->sp - 1]);
+			V_DEBUG_F("cmp '%s' #%08x #%08x\n", operands[instruction->arg1], state->stack[state->so - 2], state->stack[state->so - 1]);
 
 			/* verifies the condition for the instruction
 			execution without any problem */
-			assert(state->sp > 1);
+			assert(state->so > 1);
 
 			/* retrieves both operands from the stack and then pops
 			both elements from it */
-			operand1 = state->stack[state->sp - 2];
-			operand2 = state->stack[state->sp - 1];
-			state->sp -= 2;
+			operand1 = state->stack[state->so - 2];
+			operand2 = state->stack[state->so - 1];
+			state->so -= 2;
 
 			switch(instruction->arg1) {
 				case 1:
@@ -186,8 +186,8 @@ void mingusEval(struct State_t *state) {
 					break;
 			}
 
-            state->stack[state->sp] = result;
-			state->sp++;
+            state->stack[state->so] = result;
+			state->so++;
 
 			/* breaks the switch */
             break;
@@ -203,13 +203,13 @@ void mingusEval(struct State_t *state) {
 
 		/* in case it's the jmp eq operation */
 		case JMP_EQ:
-			V_DEBUG_F("jmp_eq %02x #%08x\n", instruction->immediate, state->stack[state->sp - 1]);
+			V_DEBUG_F("jmp_eq %02x #%08x\n", instruction->immediate, state->stack[state->so - 1]);
 
 			/* verifies the condition for the instruction
 			execution without any problem */
-			assert(state->sp > 0);
+			assert(state->so > 0);
 
-			if(state->stack[state->sp - 1] == 1) {
+			if(state->stack[state->so - 1] == 1) {
 				state->pc += instruction->immediate;
 			}
 
@@ -218,14 +218,14 @@ void mingusEval(struct State_t *state) {
 			
         /* in case it's the print instruction */
         case PRINT:
-			V_DEBUG_F("print #%08x\n", state->stack[state->sp - 1]);
+			V_DEBUG_F("print #%08x\n", state->stack[state->so - 1]);
 
 			/* verifies the condition for the instruction
 			execution without any problem */
-			assert(state->sp > 0);
+			assert(state->so > 0);
 
-			PRINTF_F("%d\n", state->stack[state->sp - 1]);
-			state->sp--;
+			PRINTF_F("%d\n", state->stack[state->so - 1]);
+			state->so--;
 
             /* breaks the switch */
             break;
@@ -246,7 +246,7 @@ void showStack(struct State_t *state) {
 
     /* iterates over all the element currently
 	under the stack (to print it) */
-	for(index = 0; index < state->sp; index++) {
+	for(index = 0; index < state->so; index++) {
         /* prints the stack information */
 		pointer = &buffer[count];
         count += SPRINTF(pointer, 1024 - count, "%08x ", state->stack[index]);

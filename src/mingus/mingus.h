@@ -78,12 +78,47 @@ typedef struct Instruction_t {
  * mingus virtual machine.
  */
 typedef struct State_t {
+	/**
+	 * Flag controlling if the virtual machine
+	 * is running.
+	 */
     unsigned int running;
+
+	/**
+	 * The program counter pointer that points
+	 * to the next instruction to be executed.
+	 */
     unsigned int pc;
-	unsigned int sp;
+
+	/**
+	 * The stack index offset, that indicated the
+	 * next position of the stack to be populated.
+	 */
+	unsigned int so;
+
+	/**
+	 * The pointer to the buffer of instruction
+	 * that compose the current program.
+	 */
     unsigned int *program;
+
+	/**
+	 * The current data stack of the virtual machine,
+	 * this structur contains the various values on
+	 * which the virtual machine can operate.
+	 */
 	int stack[STACK_SIZE];
+
+	/**
+	 * The current set of local variables that can be
+	 * used in the virtual machine context.
+	 */
 	int locals[LOCALS_SIZE];
+
+	/**
+	 * The current instruction to be executed in the
+	 * current virtual machine context (state).
+	 */
     struct Instruction_t instruction;
 } State;
 
