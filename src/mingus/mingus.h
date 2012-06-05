@@ -58,6 +58,18 @@ typedef enum Opcodes_e {
 	PRINT
 } Opcodes;
 
+typedef struct CodeHeader_t {
+	char magic[4];
+	unsigned int dataSize;
+	unsigned int codeSize;
+} CodeHeader;
+
+typedef struct Code_t {
+	struct CodeHeader_t header;
+	char *data;
+	char *code;
+} Code;
+
 /**
  * Structure describing a general instruction
  * for the mingus virtual machine.

@@ -270,6 +270,10 @@ void run(char *filePath) {
     size_t size;
     unsigned char *buffer;
 
+	/* allocates space for the reference to the header
+	of the code object to be interpreted */
+	struct CodeHeader_t *header;
+
     /* creates the virtual machine state, no program
     buffer is already set (defered loading) */
     struct State_t state = { 1, 0, 0, NULL };
@@ -277,7 +281,8 @@ void run(char *filePath) {
     /* reads the program file and sets the program
     buffer in the state */
     readFile(filePath, &buffer, &size);
-    state.program = (unsigned int *) buffer;
+	header = (struct CodeHeader_t *) buffer;
+	state.program = (unsigned int *) (buffer + sizeof(struct CodeHeader_t));
 
     /* iterates while the running flag is set */
     while(state.running) {
