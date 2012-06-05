@@ -29,16 +29,7 @@
 
 #include "mingus.h"
 
-/**
- * The example program opcodes
- * to be executed for testing.
- */
-unsigned int program[] = {
-    0x00010064,
-    0x000101c8,
-    0x00020201,
-    0x00000000
-};
+const char operands[3][32] = { "##", "==", "!=" };
 
 unsigned int mingusFetch(struct State_t *state) {
     return state->program[state->pc++];
@@ -46,22 +37,30 @@ unsigned int mingusFetch(struct State_t *state) {
 
 void mingusDecode(struct State_t *state, unsigned int instruction) {
     /* populates the (current) instruction with the decoded values */
-    state->instruction.code = (instruction & 0xffff0000) >> 16;
-    state->instruction.reg1 = (instruction & 0x00000f00) >> 8;
-    state->instruction.reg2 = (instruction & 0x000000f0) >> 4;
-    state->instruction.reg3 = (instruction & 0x0000000f);
-    state->instruction.imediate = (instruction & 0x000000ff);
+    state->instruction.opcode = (instruction & 0xffff0000) >> 16;
+    state->instruction.arg1 = (instruction & 0x00000f00) >> 8;
+    state->instruction.arg2 = (instruction & 0x000000f0) >> 4;
+    state->instruction.arg3 = (instruction & 0x0000000f);
+    state->instruction.immediate = (instruction & 0x000000ff);
 }
 
 void mingusEval(struct State_t *state) {
     /* retrieves the current instruction */
     struct Instruction_t *instruction = &state->instruction;
 
+	int operand1;
+	int operand2;
+	int result;
+
     /* swtiches over the instruction number */
-    switch(instruction->code) {
+    switch(instruction->opcode) {
         /* in case it's the halt instruction */
-        case 0:
-            PRINTF("halt\n");
+        case HALT:
+            V_DEBUG_F("halt\n");
+
+			/* verifies the condition for the instruction
+			execution without any problem */
+			assert(state->sp == 0);
 
             /* unsets the runnig flag */
             state->running = 0;
@@ -69,44 +68,195 @@ void mingusEval(struct State_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the loadi instruction */
-        case 1:
-            PRINTF_F("loadi r%d #%08x\n", instruction->reg1, instruction->imediate);
+        /* in case it's the load instruction */
+        case LOAD:
+			V_DEBUG_F("load #%08x (#%08x)\n", instruction->immediate, state->locals[instruction->immediate]);
 
-            /* sets the integer in the register */
-            state->registers[instruction->reg1] = instruction->imediate;
+            state->stack[state->sp] = state->locals[instruction->immediate];
+			state->sp++;
+
+            /* breaks the switch */
+            break;
+
+        /* in case it's the loadi instruction */
+        case LOADI:
+            V_DEBUG_F("loadi #%08x\n", instruction->immediate);
+
+            /* sets the integer in the top of stack and then
+			increments the current stack pointer */
+            state->stack[state->sp] = instruction->immediate;
+			state->sp++;
+
+            /* breaks the switch */
+            break;
+
+        /* in case it's the store instruction */
+        case STORE:
+			V_DEBUG_F("store #%08x #%08x\n", instruction->immediate, state->stack[state->sp - 1]);
+
+			/* verifies the condition for the instruction
+			execution without any problem */
+			assert(state->sp > 0);
+
+			state->locals[instruction->immediate] = state->stack[state->sp - 1];
+			state->sp--;
 
             /* breaks the switch */
             break;
 
         /* in case it's the add instruction */
-        case 2:
-            PRINTF_F("add r%d r%d r%d\n", instruction->reg1, instruction->reg2, instruction->reg3);
+        case ADD:
+			V_DEBUG_F("add #%08x #%08x\n", state->stack[state->sp - 2], state->stack[state->sp - 1]);
 
-            /* sums both registers and puts the result
-            in the third register */
-            state->registers[instruction->reg1] = state->registers[instruction->reg2] + state->registers[instruction->reg3];
+			/* verifies the condition for the instruction
+			execution without any problem */
+			assert(state->sp > 1);
+
+			/* retrieves both operands from the stack and then pops
+			both elements from it */
+			operand1 = state->stack[state->sp - 2];
+			operand2 = state->stack[state->sp - 1];
+			state->sp -= 2;
+
+            /* adds the values on top of the stack and then
+			sets the sum in the top of the stack */
+            state->stack[state->sp] = operand1 + operand2;
+			state->sp++;
+			
+            /* breaks the switch */
+            break;
+
+        /* in case it's the sub instruction */
+        case SUB:
+			V_DEBUG_F("sub #%08x #%08x\n", state->stack[state->sp - 2], state->stack[state->sp - 1]);
+
+			/* verifies the condition for the instruction
+			execution without any problem */
+			assert(state->sp > 1);
+
+			/* retrieves both operands from the stack and then pops
+			both elements from it */
+			operand1 = state->stack[state->sp - 2];
+			operand2 = state->stack[state->sp - 1];
+			state->sp -= 2;
+
+            /* adds the values on top of the stack and then
+			sets the sum in the top of the stack */
+            state->stack[state->sp] = operand1 - operand2;
+			state->sp++;
+			
+            /* breaks the switch */
+            break;
+
+        /* in case it's the pop instruction */
+        case POP:
+			V_DEBUG_F("pop #%08x\n", state->stack[state->sp - 1]);
+
+			/* verifies the condition for the instruction
+			execution without any problem */
+			assert(state->sp > 0);
+
+			/* pops the top element from the stack */
+			state->sp--;
+			
+            /* breaks the switch */
+            break;
+
+		/* in case it's the cmp operation */
+		case CMP:
+			V_DEBUG_F("cmp '%s' #%08x #%08x\n", operands[instruction->arg1], state->stack[state->sp - 2], state->stack[state->sp - 1]);
+
+			/* verifies the condition for the instruction
+			execution without any problem */
+			assert(state->sp > 1);
+
+			/* retrieves both operands from the stack and then pops
+			both elements from it */
+			operand1 = state->stack[state->sp - 2];
+			operand2 = state->stack[state->sp - 1];
+			state->sp -= 2;
+
+			switch(instruction->arg1) {
+				case 1:
+					result = operand1 == operand2 ? 1 : 0;
+					break;
+
+				case 2:
+					result = operand1 != operand2 ? 1 : 0;
+					break;
+			}
+
+            state->stack[state->sp] = result;
+			state->sp++;
+
+			/* breaks the switch */
+            break;
+
+		/* in case it's the jmp operation */
+		case JMP:
+			V_DEBUG_F("jmp %02x\n", instruction->immediate);
+
+			state->pc += instruction->immediate;
+
+			/* breaks the switch */
+            break;
+
+		/* in case it's the jmp eq operation */
+		case JMP_EQ:
+			V_DEBUG_F("jmp_eq %02x #%08x\n", instruction->immediate, state->stack[state->sp - 1]);
+
+			/* verifies the condition for the instruction
+			execution without any problem */
+			assert(state->sp > 0);
+
+			if(state->stack[state->sp - 1] == 1) {
+				state->pc += instruction->immediate;
+			}
+
+			/* breaks the switch */
+            break;
+			
+        /* in case it's the print instruction */
+        case PRINT:
+			V_DEBUG_F("print #%08x\n", state->stack[state->sp - 1]);
+
+			/* verifies the condition for the instruction
+			execution without any problem */
+			assert(state->sp > 0);
+
+			PRINTF_F("%d\n", state->stack[state->sp - 1]);
+			state->sp--;
 
             /* breaks the switch */
             break;
     }
 }
 
-void showRegisters(struct State_t *state) {
-    /* allocates the index */
-    int index;
+void showStack(struct State_t *state) {
+    /* allocates space for the index to be used
+	in the iteration and the allocates space for
+	the buffer for the print information */
+	size_t count;
+    unsigned int index;
+	char buffer[1024];
+	char *pointer;
 
     /* prints the initial line */
-    PRINTF("regs => ");
+    count = SPRINTF(buffer, 1024, "%s", "stack => ");
 
-    /* iterates over all the registers */
-    for(index = 0; index < NUMBER_REGISTERS; index++) {
-        /* prints the register information */
-        PRINTF_F("%08x ", state->registers[index]);
+    /* iterates over all the element currently
+	under the stack (to print it) */
+	for(index = 0; index < state->sp; index++) {
+        /* prints the stack information */
+		pointer = &buffer[count];
+        count += SPRINTF(pointer, 1024 - count, "%08x ", state->stack[index]);
     }
 
-    /* prints the newline */
-    PRINTF("\n");
+    /* prints the final newline into de buffer and
+	then debugs the stack information */
+	pointer = &buffer[count];
+    SPRINTF(pointer, 1024 - count, "%s", "\n");
+	V_DEBUG(buffer);
 }
 
 void run(char *filePath) {
@@ -122,7 +272,7 @@ void run(char *filePath) {
 
     /* creates the virtual machine state, no program
     buffer is already set (defered loading) */
-    struct State_t state = { 1, 0, NULL };
+    struct State_t state = { 1, 0, 0, NULL };
 
     /* reads the program file and sets the program
     buffer in the state */
@@ -131,9 +281,9 @@ void run(char *filePath) {
 
     /* iterates while the running flag is set */
     while(state.running) {
-        /* shows the registers, to the default output
+        /* shows the stack, to the default output
         buffer (standard output) */
-        showRegisters(&state);
+        showStack(&state);
 
         /* fetches the next instruction, decodes it into
         the intruction and then evalutates the current state */
@@ -141,9 +291,6 @@ void run(char *filePath) {
         mingusDecode(&state, instruction);
         mingusEval(&state);
     }
-
-    /* shows the registers */
-    showRegisters(&state);
 }
 
 int main(int argc, const char *argv[]) {
