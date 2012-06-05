@@ -48,9 +48,9 @@ void mingusEval(struct State_t *state) {
     /* retrieves the current instruction */
     struct Instruction_t *instruction = &state->instruction;
 
-	int operand1;
-	int operand2;
-	int result;
+    int operand1;
+    int operand2;
+    int result;
 
     /* swtiches over the instruction number */
     switch(instruction->opcode) {
@@ -58,9 +58,9 @@ void mingusEval(struct State_t *state) {
         case HALT:
             V_DEBUG_F("halt\n");
 
-			/* verifies the condition for the instruction
-			execution without any problem */
-			assert(state->so == 0);
+            /* verifies the condition for the instruction
+            execution without any problem */
+            assert(state->so == 0);
 
             /* unsets the runnig flag */
             state->running = 0;
@@ -70,10 +70,10 @@ void mingusEval(struct State_t *state) {
 
         /* in case it's the load instruction */
         case LOAD:
-			V_DEBUG_F("load #%08x (#%08x)\n", instruction->immediate, state->locals[instruction->immediate]);
+            V_DEBUG_F("load #%08x (#%08x)\n", instruction->immediate, state->locals[instruction->immediate]);
 
             state->stack[state->so] = state->locals[instruction->immediate];
-			state->so++;
+            state->so++;
 
             /* breaks the switch */
             break;
@@ -83,149 +83,149 @@ void mingusEval(struct State_t *state) {
             V_DEBUG_F("loadi #%08x\n", instruction->immediate);
 
             /* sets the integer in the top of stack and then
-			increments the current stack pointer */
+            increments the current stack pointer */
             state->stack[state->so] = instruction->immediate;
-			state->so++;
+            state->so++;
 
             /* breaks the switch */
             break;
 
         /* in case it's the store instruction */
         case STORE:
-			V_DEBUG_F("store #%08x #%08x\n", instruction->immediate, state->stack[state->so - 1]);
+            V_DEBUG_F("store #%08x #%08x\n", instruction->immediate, state->stack[state->so - 1]);
 
-			/* verifies the condition for the instruction
-			execution without any problem */
-			assert(state->so > 0);
+            /* verifies the condition for the instruction
+            execution without any problem */
+            assert(state->so > 0);
 
-			state->locals[instruction->immediate] = state->stack[state->so - 1];
-			state->so--;
+            state->locals[instruction->immediate] = state->stack[state->so - 1];
+            state->so--;
 
             /* breaks the switch */
             break;
 
         /* in case it's the add instruction */
         case ADD:
-			V_DEBUG_F("add #%08x #%08x\n", state->stack[state->so - 2], state->stack[state->so - 1]);
+            V_DEBUG_F("add #%08x #%08x\n", state->stack[state->so - 2], state->stack[state->so - 1]);
 
-			/* verifies the condition for the instruction
-			execution without any problem */
-			assert(state->so > 1);
+            /* verifies the condition for the instruction
+            execution without any problem */
+            assert(state->so > 1);
 
-			/* retrieves both operands from the stack and then pops
-			both elements from it */
-			operand1 = state->stack[state->so - 2];
-			operand2 = state->stack[state->so - 1];
-			state->so -= 2;
+            /* retrieves both operands from the stack and then pops
+            both elements from it */
+            operand1 = state->stack[state->so - 2];
+            operand2 = state->stack[state->so - 1];
+            state->so -= 2;
 
             /* adds the values on top of the stack and then
-			sets the sum in the top of the stack */
+            sets the sum in the top of the stack */
             state->stack[state->so] = operand1 + operand2;
-			state->so++;
-			
+            state->so++;
+
             /* breaks the switch */
             break;
 
         /* in case it's the sub instruction */
         case SUB:
-			V_DEBUG_F("sub #%08x #%08x\n", state->stack[state->so - 2], state->stack[state->so - 1]);
+            V_DEBUG_F("sub #%08x #%08x\n", state->stack[state->so - 2], state->stack[state->so - 1]);
 
-			/* verifies the condition for the instruction
-			execution without any problem */
-			assert(state->so > 1);
+            /* verifies the condition for the instruction
+            execution without any problem */
+            assert(state->so > 1);
 
-			/* retrieves both operands from the stack and then pops
-			both elements from it */
-			operand1 = state->stack[state->so - 2];
-			operand2 = state->stack[state->so - 1];
-			state->so -= 2;
+            /* retrieves both operands from the stack and then pops
+            both elements from it */
+            operand1 = state->stack[state->so - 2];
+            operand2 = state->stack[state->so - 1];
+            state->so -= 2;
 
             /* adds the values on top of the stack and then
-			sets the sum in the top of the stack */
+            sets the sum in the top of the stack */
             state->stack[state->so] = operand1 - operand2;
-			state->so++;
-			
+            state->so++;
+
             /* breaks the switch */
             break;
 
         /* in case it's the pop instruction */
         case POP:
-			V_DEBUG_F("pop #%08x\n", state->stack[state->so - 1]);
+            V_DEBUG_F("pop #%08x\n", state->stack[state->so - 1]);
 
-			/* verifies the condition for the instruction
-			execution without any problem */
-			assert(state->so > 0);
+            /* verifies the condition for the instruction
+            execution without any problem */
+            assert(state->so > 0);
 
-			/* pops the top element from the stack */
-			state->so--;
-			
+            /* pops the top element from the stack */
+            state->so--;
+
             /* breaks the switch */
             break;
 
-		/* in case it's the cmp operation */
-		case CMP:
-			V_DEBUG_F("cmp '%s' #%08x #%08x\n", operands[instruction->arg1], state->stack[state->so - 2], state->stack[state->so - 1]);
+        /* in case it's the cmp operation */
+        case CMP:
+            V_DEBUG_F("cmp '%s' #%08x #%08x\n", operands[instruction->arg1], state->stack[state->so - 2], state->stack[state->so - 1]);
 
-			/* verifies the condition for the instruction
-			execution without any problem */
-			assert(state->so > 1);
+            /* verifies the condition for the instruction
+            execution without any problem */
+            assert(state->so > 1);
 
-			/* retrieves both operands from the stack and then pops
-			both elements from it */
-			operand1 = state->stack[state->so - 2];
-			operand2 = state->stack[state->so - 1];
-			state->so -= 2;
+            /* retrieves both operands from the stack and then pops
+            both elements from it */
+            operand1 = state->stack[state->so - 2];
+            operand2 = state->stack[state->so - 1];
+            state->so -= 2;
 
-			switch(instruction->arg1) {
-				case 1:
-					result = operand1 == operand2 ? 1 : 0;
-					break;
+            switch(instruction->arg1) {
+                case 1:
+                    result = operand1 == operand2 ? 1 : 0;
+                    break;
 
-				case 2:
-					result = operand1 != operand2 ? 1 : 0;
-					break;
-			}
+                case 2:
+                    result = operand1 != operand2 ? 1 : 0;
+                    break;
+            }
 
             state->stack[state->so] = result;
-			state->so++;
+            state->so++;
 
-			/* breaks the switch */
+            /* breaks the switch */
             break;
 
-		/* in case it's the jmp operation */
-		case JMP:
-			V_DEBUG_F("jmp %02x\n", instruction->immediate);
+        /* in case it's the jmp operation */
+        case JMP:
+            V_DEBUG_F("jmp %02x\n", instruction->immediate);
 
-			state->pc += instruction->immediate;
+            state->pc += instruction->immediate;
 
-			/* breaks the switch */
+            /* breaks the switch */
             break;
 
-		/* in case it's the jmp eq operation */
-		case JMP_EQ:
-			V_DEBUG_F("jmp_eq %02x #%08x\n", instruction->immediate, state->stack[state->so - 1]);
+        /* in case it's the jmp eq operation */
+        case JMP_EQ:
+            V_DEBUG_F("jmp_eq %02x #%08x\n", instruction->immediate, state->stack[state->so - 1]);
 
-			/* verifies the condition for the instruction
-			execution without any problem */
-			assert(state->so > 0);
+            /* verifies the condition for the instruction
+            execution without any problem */
+            assert(state->so > 0);
 
-			if(state->stack[state->so - 1] == 1) {
-				state->pc += instruction->immediate;
-			}
+            if(state->stack[state->so - 1] == 1) {
+                state->pc += instruction->immediate;
+            }
 
-			/* breaks the switch */
+            /* breaks the switch */
             break;
-			
+
         /* in case it's the print instruction */
         case PRINT:
-			V_DEBUG_F("print #%08x\n", state->stack[state->so - 1]);
+            V_DEBUG_F("print #%08x\n", state->stack[state->so - 1]);
 
-			/* verifies the condition for the instruction
-			execution without any problem */
-			assert(state->so > 0);
+            /* verifies the condition for the instruction
+            execution without any problem */
+            assert(state->so > 0);
 
-			PRINTF_F("%d\n", state->stack[state->so - 1]);
-			state->so--;
+            PRINTF_F("%d\n", state->stack[state->so - 1]);
+            state->so--;
 
             /* breaks the switch */
             break;
@@ -234,29 +234,29 @@ void mingusEval(struct State_t *state) {
 
 void showStack(struct State_t *state) {
     /* allocates space for the index to be used
-	in the iteration and the allocates space for
-	the buffer for the print information */
-	size_t count;
+    in the iteration and the allocates space for
+    the buffer for the print information */
+    size_t count;
     unsigned int index;
-	char buffer[1024];
-	char *pointer;
+    char buffer[1024];
+    char *pointer;
 
     /* prints the initial line */
     count = SPRINTF(buffer, 1024, "%s", "stack => ");
 
     /* iterates over all the element currently
-	under the stack (to print it) */
-	for(index = 0; index < state->so; index++) {
+    under the stack (to print it) */
+    for(index = 0; index < state->so; index++) {
         /* prints the stack information */
-		pointer = &buffer[count];
+        pointer = &buffer[count];
         count += SPRINTF(pointer, 1024 - count, "%08x ", state->stack[index]);
     }
 
     /* prints the final newline into de buffer and
-	then debugs the stack information */
-	pointer = &buffer[count];
+    then debugs the stack information */
+    pointer = &buffer[count];
     SPRINTF(pointer, 1024 - count, "%s", "\n");
-	V_DEBUG(buffer);
+    V_DEBUG(buffer);
 }
 
 void run(char *filePath) {
@@ -270,9 +270,9 @@ void run(char *filePath) {
     size_t size;
     unsigned char *buffer;
 
-	/* allocates space for the reference to the header
-	of the code object to be interpreted */
-	struct CodeHeader_t *header;
+    /* allocates space for the reference to the header
+    of the code object to be interpreted */
+    struct CodeHeader_t *header;
 
     /* creates the virtual machine state, no program
     buffer is already set (defered loading) */
@@ -281,8 +281,8 @@ void run(char *filePath) {
     /* reads the program file and sets the program
     buffer in the state */
     readFile(filePath, &buffer, &size);
-	header = (struct CodeHeader_t *) buffer;
-	state.program = (unsigned int *) (buffer + sizeof(struct CodeHeader_t));
+    header = (struct CodeHeader_t *) buffer;
+    state.program = (unsigned int *) (buffer + sizeof(struct CodeHeader_t));
 
     /* iterates while the running flag is set */
     while(state.running) {
@@ -299,12 +299,12 @@ void run(char *filePath) {
 }
 
 int main(int argc, const char *argv[]) {
-	/* allocates and starts the pointer to the path
-	of the file to be interpreted, checks if the number
-	of arguments is greater than one and in case it is
-	updates the file path with the second argument */
-	char *filePath = NULL;
-	if(argc > 1) { filePath = (char *) argv[1]; }
+    /* allocates and starts the pointer to the path
+    of the file to be interpreted, checks if the number
+    of arguments is greater than one and in case it is
+    updates the file path with the second argument */
+    char *filePath = NULL;
+    if(argc > 1) { filePath = (char *) argv[1]; }
 
     /* runs the virtual machine */
     run(filePath);
