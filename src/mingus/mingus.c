@@ -109,7 +109,7 @@ void showRegisters(struct State_t *state) {
     PRINTF("\n");
 }
 
-void run() {
+void run(char *filePath) {
     /* allocates the space for the instruction
     value (its a "normal" integer value, 32 bit)*/
     int instruction;
@@ -126,7 +126,7 @@ void run() {
 
     /* reads the program file and sets the program
     buffer in the state */
-    readFile("c:/calc.moc", &buffer, &size);
+    readFile(filePath, &buffer, &size);
     state.program = (unsigned int *) buffer;
 
     /* iterates while the running flag is set */
@@ -147,8 +147,15 @@ void run() {
 }
 
 int main(int argc, const char *argv[]) {
+	/* allocates and starts the pointer to the path
+	of the file to be interpreted, checks if the number
+	of arguments is greater than one and in case it is
+	updates the file path with the second argument */
+	char *filePath = NULL;
+	if(argc > 1) { filePath = (char *) argv[1]; }
+
     /* runs the virtual machine */
-    run();
+    run(filePath);
 
     /* returns with no error */
     return 0;
