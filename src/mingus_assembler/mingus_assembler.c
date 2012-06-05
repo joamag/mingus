@@ -91,7 +91,7 @@ void putCode(unsigned int instruction, FILE *file) {
     putc((instruction & 0xff000000) >> 24, file);
 }
 
-int ontokenEnd(struct MingusParser_t *parser, char *pointer, size_t size) {
+ERROR_CODE ontokenEnd(struct MingusParser_t *parser, char *pointer, size_t size) {
     char *string = MALLOC(size + 1);
     memcpy(string, pointer, size);
     string[size] = '\0';
@@ -117,8 +117,6 @@ int ontokenEnd(struct MingusParser_t *parser, char *pointer, size_t size) {
             parser->instruction |= 0x00000000;
 
             putCode(parser->instruction, parser->output);
-
-            // flush instruction
         }
     } else {
         switch(parser->opcode) {
@@ -163,19 +161,21 @@ int ontokenEnd(struct MingusParser_t *parser, char *pointer, size_t size) {
         }
     }
 
-    printf("TOKEN -> '%s'\n", string);
+	FREE(string);
 
-    return 0;
+	/* raises no error */
+    RAISE_NO_ERROR;
 }
 
-int oncommentEnd(struct MingusParser_t *parser, char *pointer, size_t size) {
+ERROR_CODE oncommentEnd(struct MingusParser_t *parser, char *pointer, size_t size) {
     char *string = MALLOC(size + 1);
     memcpy(string, pointer, size);
     string[size] = '\0';
 
-    printf("COMMENT -> '%s'\n", string);
+	FREE(string);
 
-    return 0;
+	/* raises no error */
+    RAISE_NO_ERROR;
 }
 
 
@@ -200,7 +200,6 @@ int main(int argc, const char *argv[]) {
 
     FILE *out;
 
-
     /* allocates space for the file structure to
     hold the reference to be assembled */
     FILE *file;
@@ -219,27 +218,27 @@ int main(int argc, const char *argv[]) {
     immediately in error */
     if(file == NULL) { PRINTF("error reading file"); return 1; }
 
+	/* tries to open the output file in writing mode,
+	this is the file to old the assembled code */
     FOPEN(&out, "c:/calc.moc", "wb");
 
-    /**
-     * iterate over all the lines in the file
-     * 1. check if the line is empty (skip)
-     * 2. check if the line contains a comment (ignore)
-     * 3. check the name of the opcode
-     * 4. retrieve the appropriate arguments to the operation
-     */
+	/* in case the file could not be opened, returns
+    immediately in error */
+    if(out == NULL) { PRINTF("error opening output file"); return 1; }
 
     /* allocates the required size to read the complete file
     and then reads it completly */
     buffer = (char *) MALLOC(fileSize);
     fread(buffer, 1, fileSize, file);
 
+	/* sets the initial pointer position to the position of 
+	the begining of the buffer */
     pointer = buffer;
 
-
+	/* updates the parser structure setting the appropriate
+	output file (buffer) and the initial opcode value */
     parser.output = out;
     parser.opcode = UNSET_OPCODE;
-
 
     /* iterates continuously over the file buffer to
     parse the file and generate the output */
@@ -317,7 +316,6 @@ int main(int argc, const char *argv[]) {
                         break;
                 }
 
-
                 /* breaks the switch */
                 break;
         }
@@ -330,16 +328,11 @@ int main(int argc, const char *argv[]) {
     /* releases the buffer, to avoid any memory leaking */
     FREE(buffer);
 
-
-
-
-
+    /* closes both the input and output files (all the parsing
+	has been done) the output has been generated */
     fclose(out);
-
-
-    /* closes the file (all the parsing has been done)
-    the output has been generated */
     fclose(file);
 
+	/* retuns with no error (normal return) */
     return 0;
 }
