@@ -38,6 +38,13 @@
 #define LOCALS_SIZE 512
 
 /**
+ * The version of the code file currently in
+ * use, any change to the structure should
+ * increment this value.
+ */
+#define MINGUS_CODE_VERSION 1
+
+/**
  * Enumeration defining all the opcodes for
  * the various mingus operations.
  */
@@ -60,6 +67,7 @@ typedef enum Opcodes_e {
 
 typedef struct CodeHeader_t {
 	char magic[4];
+	unsigned int version;
 	unsigned int dataSize;
 	unsigned int codeSize;
 } CodeHeader;
