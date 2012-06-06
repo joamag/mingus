@@ -37,25 +37,25 @@
  * Enumeration defining all the possible
  * states for the mingus assembler parser.
  */
-typedef enum MingusStates_e {
+typedef enum mingus_states_e {
     NORMAL = 1,
     TOKEN,
     COMMENT
-} MingusStates;
+} mingus_states;
 
-typedef struct MingusParser_t {
+typedef struct mingus_parser_t {
     FILE *output;
-    size_t instructionCount;
-    struct Instruction_t *instruction;
-    struct Instruction_t instructions[1024];
+    size_t instruction_count;
+    struct instruction_t *instruction;
+    struct instruction_t instructions[1024];
     struct HashMap_t *labels;
-} MingusParser;
+} mingus_parser;
 
 #define MINGUS_MARK(FOR) MINGUS_MARK_N(FOR, 0)
 #define MINGUS_MARK_BACK(FOR) MINGUS_MARK_N(FOR, 1)
 #define MINGUS_MARK_N(FOR, N)\
     do {\
-        FOR##Mark = pointer - N;\
+        FOR##_mark = pointer - N;\
     } while(0)
 
 #define MINGUS_CALLBACK(FOR)\
@@ -71,28 +71,28 @@ typedef struct MingusParser_t {
 #define MINGUS_CALLBACK_DATA_BACK(FOR) MINGUS_CALLBACK_DATA_N(FOR, 1)
 #define MINGUS_CALLBACK_DATA_N(FOR, N)\
     do {\
-        if(FOR##Mark) {\
-            if(on##FOR(&parser, FOR##Mark, pointer - FOR##Mark - N) != 0) {\
+        if(FOR##_mark) {\
+            if(on_##FOR(&parser, FOR##_mark, pointer - FOR##_mark - N) != 0) {\
                 RAISE_ERROR_M(RUNTIME_EXCEPTION_ERROR_CODE, (unsigned char *) "Problem handling callback"); \
             }\
-            FOR##Mark = NULL;\
+            FOR##_mark = NULL;\
         }\
     } while(0)
 
 
 
-void putCode(unsigned int instruction, FILE *file) {
+void put_code(unsigned int instruction, FILE *file) {
     putc((instruction & 0x000000ff), file);
     putc((instruction & 0x0000ff00) >> 8, file);
     putc((instruction & 0x00ff0000) >> 16, file);
     putc((instruction & 0xff000000) >> 24, file);
 }
 
-void putBuffer(char *buffer, size_t size, FILE *file) {
+void put_buffer(char *buffer, size_t size, FILE *file) {
     fwrite(buffer, 1, size, file);
 }
 
-ERROR_CODE ontokenEnd(struct MingusParser_t *parser, char *pointer, size_t size) {
+ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t size) {
     char *string = MALLOC(size + 1);
     memcpy(string, pointer, size);
     string[size] = '\0';
@@ -104,18 +104,18 @@ ERROR_CODE ontokenEnd(struct MingusParser_t *parser, char *pointer, size_t size)
     colon this token is considered to be a label */
     else if(string[size - 1] == ':') {
         string[size - 1] = '\0';
-        setValueStringHashMap(parser->labels, string, (void *) parser->instructionCount);
+        setValueStringHashMap(parser->labels, string, (void *) parser->instruction_count);
     }
     /* otherwise it's considered to be an opcode reference
     and should be processed normally */
     else if(parser->instruction == NULL) {
         /* sets the current instruction pointer in the
         parser for correct execution */
-        parser->instruction = &parser->instructions[parser->instructionCount];
+        parser->instruction = &parser->instructions[parser->instruction_count];
 
         /* increments the number of instruction processed
         (this is the instruction counteter) */
-        parser->instructionCount++;
+        parser->instruction_count++;
 
         parser->instruction->code = 0x00000000;
         parser->instruction->opcode = UNSET_OPCODE;
@@ -123,7 +123,7 @@ ERROR_CODE ontokenEnd(struct MingusParser_t *parser, char *pointer, size_t size)
         parser->instruction->arg2 = _UNDEFINED;
         parser->instruction->arg3 = _UNDEFINED;
         parser->instruction->immediate = _UNDEFINED;
-        parser->instruction->position = parser->instructionCount;
+        parser->instruction->position = parser->instruction_count;
 
         if(strcmp(string, "load") == 0) {
             parser->instruction->opcode = LOAD;
@@ -220,7 +220,7 @@ ERROR_CODE ontokenEnd(struct MingusParser_t *parser, char *pointer, size_t size)
     RAISE_NO_ERROR;
 }
 
-ERROR_CODE oncommentEnd(struct MingusParser_t *parser, char *pointer, size_t size) {
+ERROR_CODE on_comment_end(struct mingus_parser_t *parser, char *pointer, size_t size) {
     char *string = MALLOC(size + 1);
     memcpy(string, pointer, size);
     string[size] = '\0';
@@ -246,11 +246,11 @@ int main(int argc, const char *argv[]) {
 
     char *buffer;
     char *pointer;
-    char *tokenEndMark;
-    char *commentEndMark;
+    char *token_end_mark;
+    char *comment_end_mark;
 
-    struct Code_t code;
-    struct MingusParser_t parser;
+    struct code_t code;
+    struct mingus_parser_t parser;
 
     FILE *out;
 
@@ -260,7 +260,7 @@ int main(int argc, const char *argv[]) {
 
     /* starts the parser initial state as the
     normal state in between operations */
-    enum MingusStates_e state = NORMAL;
+    enum mingus_states_e state = NORMAL;
 
     /* counts the number of bytes in the asm file
     and then opens the asm file to be assembled in
@@ -293,7 +293,7 @@ int main(int argc, const char *argv[]) {
     output file (buffer) and the initial opcode value */
     parser.output = out;
     parser.instruction = NULL;
-    parser.instructionCount = 0;
+    parser.instruction_count = 0;
 
     /* creates the hash map to hold the various labels */
     createHashMap(&parser.labels, 0);
@@ -315,7 +315,7 @@ int main(int argc, const char *argv[]) {
                     case ';':
                         state = COMMENT;
 
-                        MINGUS_MARK(commentEnd);
+                        MINGUS_MARK(comment_end);
 
                         /* breaks the switch */
                         break;
@@ -329,7 +329,7 @@ int main(int argc, const char *argv[]) {
                     default:
                         state = TOKEN;
 
-                        MINGUS_MARK(tokenEnd);
+                        MINGUS_MARK(token_end);
 
                         /* breaks the switch */
                         break;
@@ -345,7 +345,7 @@ int main(int argc, const char *argv[]) {
                     case '\n':
                         state = NORMAL;
 
-                        MINGUS_CALLBACK_DATA(tokenEnd);
+                        MINGUS_CALLBACK_DATA(token_end);
 
                         /* breaks the switch */
                         break;
@@ -364,7 +364,7 @@ int main(int argc, const char *argv[]) {
                     case '\n':
                         state = NORMAL;
 
-                        MINGUS_CALLBACK_DATA(commentEnd);
+                        MINGUS_CALLBACK_DATA(comment_end);
 
                         /* breaks the switch */
                         break;
@@ -385,12 +385,12 @@ int main(int argc, const char *argv[]) {
 
     memcpy(code.header.magic, "MING", 4);
     code.header.version = MINGUS_CODE_VERSION;
-    code.header.dataSize = 0;
-    code.header.codeSize = parser.instructionCount * sizeof(int);
+    code.header.data_size = 0;
+    code.header.code_size = parser.instruction_count * sizeof(int);
 
-    putBuffer((char *) &code.header, sizeof(struct CodeHeader_t), parser.output);
+    put_buffer((char *) &code.header, sizeof(struct code_header_t), parser.output);
 
-    for(index = 0; index < parser.instructionCount; index++) {
+    for(index = 0; index < parser.instruction_count; index++) {
         /* sets the current instruction pointer in the
         parser for correct execution */
         parser.instruction = &parser.instructions[index];
@@ -404,12 +404,12 @@ int main(int argc, const char *argv[]) {
                 break;
         }
 
-        putCode(parser.instruction->code, parser.output);
+        put_code(parser.instruction->code, parser.output);
     }
 
     /* prints a logging message indicating the results
     of the assembling */
-    PRINTF_F("Processed %d instructions...\n", parser.instructionCount);
+    PRINTF_F("Processed %d instructions...\n", parser.instruction_count);
 
     /* releases the buffer, to avoid any memory leaking */
     FREE(buffer);

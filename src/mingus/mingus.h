@@ -48,7 +48,7 @@
  * Enumeration defining all the opcodes for
  * the various mingus operations.
  */
-typedef enum Opcodes_e {
+typedef enum opcodes_e {
     UNSET_OPCODE = -1,
     HALT,
     LOAD,
@@ -63,41 +63,41 @@ typedef enum Opcodes_e {
     JMP_NEQ,
     JMP_ABS,
     PRINT
-} Opcodes;
+} opcodes;
 
-typedef struct CodeHeader_t {
+typedef struct code_header_t {
     char magic[4];
     unsigned int version;
-    unsigned int dataSize;
-    unsigned int codeSize;
-} CodeHeader;
+    unsigned int data_size;
+    unsigned int code_size;
+} code_header;
 
-typedef struct Code_t {
-    struct CodeHeader_t header;
+typedef struct code_t {
+    struct code_header_t header;
     char *data;
     char *code;
-} Code;
+} code;
 
 /**
  * Structure describing a general instruction
  * for the mingus virtual machine.
  */
-typedef struct Instruction_t {
+typedef struct instruction_t {
     int code;
-    enum Opcodes_e opcode;
+    enum opcodes_e opcode;
     char arg1;
     char arg2;
     char arg3;
     char immediate;
     char string[128];
     unsigned int position;
-} Instruction;
+} instruction;
 
 /**
  * Structure describing a state of the
  * mingus virtual machine.
  */
-typedef struct State_t {
+typedef struct state_t {
     /**
      * Flag controlling if the virtual machine
      * is running.
@@ -139,8 +139,8 @@ typedef struct State_t {
      * The current instruction to be executed in the
      * current virtual machine context (state).
      */
-    struct Instruction_t instruction;
-} State;
+    struct instruction_t instruction;
+} state;
 
 /**
  * Fetches the next instruction opcode
@@ -149,7 +149,7 @@ typedef struct State_t {
  * @param state The current virtual machine state.
  * @return The next instruction opcode.
  */
-unsigned int mingusFetch(struct State_t *state);
+unsigned int mingus_fetch(struct state_t *state);
 
 /**
  * Decodes the given instruction, extracting
@@ -160,7 +160,7 @@ unsigned int mingusFetch(struct State_t *state);
  * @param instruction The instruction to be decoded
  * into the global variables.
  */
-void mingusDecode(struct State_t *state, unsigned int instruction);
+void mingus_decode(struct state_t *state, unsigned int instruction);
 
 /**
  * Evaluates the latest decoded instruction, and
@@ -168,4 +168,12 @@ void mingusDecode(struct State_t *state, unsigned int instruction);
  *
  * @param state The current virtual machine state.
  */
-void mingusEval(struct State_t *state);
+void mingus_eval(struct state_t *state);
+
+/**
+ * Shows the state of the stack for the provided
+ * state structure.
+ *
+ * @param state The current virtual machine state.
+ */
+void show_stack(struct state_t *state);

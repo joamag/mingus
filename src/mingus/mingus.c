@@ -31,11 +31,11 @@
 
 const char operands[3][32] = { "##", "==", "!=" };
 
-unsigned int mingusFetch(struct State_t *state) {
+unsigned int mingus_fetch(struct state_t *state) {
     return state->program[state->pc++];
 }
 
-void mingusDecode(struct State_t *state, unsigned int instruction) {
+void mingus_decode(struct state_t *state, unsigned int instruction) {
     /* populates the (current) instruction with the decoded values */
     state->instruction.opcode = (instruction & 0xffff0000) >> 16;
     state->instruction.arg1 = (instruction & 0x00000f00) >> 8;
@@ -44,9 +44,9 @@ void mingusDecode(struct State_t *state, unsigned int instruction) {
     state->instruction.immediate = (instruction & 0x000000ff);
 }
 
-void mingusEval(struct State_t *state) {
+void mingus_eval(struct state_t *state) {
     /* retrieves the current instruction */
-    struct Instruction_t *instruction = &state->instruction;
+    struct instruction_t *instruction = &state->instruction;
 
     int operand1;
     int operand2;
@@ -232,7 +232,46 @@ void mingusEval(struct State_t *state) {
     }
 }
 
-void showStack(struct State_t *state) {
+void run(char *filePath) {
+    /* allocates the space for the instruction
+    value (its a "normal" integer value, 32 bit)*/
+    int instruction;
+
+    /* allocates sapce for the variable that will
+    hold the size of the bytecode buffer and for
+    the buffer that will hold the bytecode */
+    size_t size;
+    unsigned char *buffer;
+
+    /* allocates space for the reference to the header
+    of the code object to be interpreted */
+    struct code_header_t *header;
+
+    /* creates the virtual machine state, no program
+    buffer is already set (defered loading) */
+    struct state_t state = { 1, 0, 0, NULL };
+
+    /* reads the program file and sets the program
+    buffer in the state */
+    readFile(filePath, &buffer, &size);
+    header = (struct code_header_t *) buffer;
+    state.program = (unsigned int *) (buffer + sizeof(struct code_header_t));
+
+    /* iterates while the running flag is set */
+    while(state.running) {
+        /* shows the stack, to the default output
+        buffer (standard output) */
+        show_stack(&state);
+
+        /* fetches the next instruction, decodes it into
+        the intruction and then evalutates the current state */
+        instruction = mingus_fetch(&state);
+        mingus_decode(&state, instruction);
+        mingus_eval(&state);
+    }
+}
+
+void show_stack(struct state_t *state) {
     /* allocates space for the index to be used
     in the iteration and the allocates space for
     the buffer for the print information */
@@ -257,45 +296,6 @@ void showStack(struct State_t *state) {
     pointer = &buffer[count];
     SPRINTF(pointer, 1024 - count, "%s", "\n");
     V_DEBUG(buffer);
-}
-
-void run(char *filePath) {
-    /* allocates the space for the instruction
-    value (its a "normal" integer value, 32 bit)*/
-    int instruction;
-
-    /* allocates sapce for the variable that will
-    hold the size of the bytecode buffer and for
-    the buffer that will hold the bytecode */
-    size_t size;
-    unsigned char *buffer;
-
-    /* allocates space for the reference to the header
-    of the code object to be interpreted */
-    struct CodeHeader_t *header;
-
-    /* creates the virtual machine state, no program
-    buffer is already set (defered loading) */
-    struct State_t state = { 1, 0, 0, NULL };
-
-    /* reads the program file and sets the program
-    buffer in the state */
-    readFile(filePath, &buffer, &size);
-    header = (struct CodeHeader_t *) buffer;
-    state.program = (unsigned int *) (buffer + sizeof(struct CodeHeader_t));
-
-    /* iterates while the running flag is set */
-    while(state.running) {
-        /* shows the stack, to the default output
-        buffer (standard output) */
-        showStack(&state);
-
-        /* fetches the next instruction, decodes it into
-        the intruction and then evalutates the current state */
-        instruction = mingusFetch(&state);
-        mingusDecode(&state, instruction);
-        mingusEval(&state);
-    }
 }
 
 int main(int argc, const char *argv[]) {
