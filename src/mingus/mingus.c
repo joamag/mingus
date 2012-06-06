@@ -253,7 +253,7 @@ void run(char *file_path) {
 
     /* reads the program file and sets the program
     buffer in the state */
-    readFile(file_path, &buffer, &size);
+    read_file(file_path, &buffer, &size);
     header = (struct code_header_t *) buffer;
     state.program = (unsigned int *) (buffer + sizeof(struct code_header_t));
 

@@ -100,7 +100,7 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
     colon this token is considered to be a label */
     else if(string[size - 1] == ':') {
         string[size - 1] = '\0';
-        setValueStringHashMap(parser->labels, string, (void *) parser->instruction_count);
+        set_value_string_hash_map(parser->labels, string, (void *) parser->instruction_count);
     }
     /* otherwise it's considered to be an opcode reference
     and should be processed normally */
@@ -263,7 +263,7 @@ int main(int argc, const char *argv[]) {
     /* counts the number of bytes in the asm file
     and then opens the asm file to be assembled in
     binary mode (required for parsing) */
-    countFile("c:/calc.mia", &file_size);
+    count_file("c:/calc.mia", &file_size);
     FOPEN(&file, "c:/calc.mia", "rb");
 
     /* in case the file could not be read, returns
@@ -294,7 +294,7 @@ int main(int argc, const char *argv[]) {
     parser.instruction_count = 0;
 
     /* creates the hash map to hold the various labels */
-    createHashMap(&parser.labels, 0);
+    create_hash_map(&parser.labels, 0);
 
     /* iterates continuously over the file buffer to
     parse the file and generate the output */
@@ -396,7 +396,7 @@ int main(int argc, const char *argv[]) {
         switch(parser.instruction->opcode) {
             case JMP:
             case JMP_EQ:
-                getValueStringHashMap(parser.labels, parser.instruction->string, (void **) &parser.instruction->immediate);
+                get_value_string_hash_map(parser.labels, parser.instruction->string, (void **) &parser.instruction->immediate);
                 parser.instruction->code |= (unsigned char) (parser.instruction->immediate - parser.instruction->position);
 
                 break;
