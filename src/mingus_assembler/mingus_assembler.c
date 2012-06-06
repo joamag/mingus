@@ -210,6 +210,8 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
         }
     }
 
+	/* releases the current string memory (avoids any
+	possible memory leak */
     FREE(string);
 
     /* raises no error */
