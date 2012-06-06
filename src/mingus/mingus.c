@@ -232,7 +232,7 @@ void mingus_eval(struct state_t *state) {
     }
 }
 
-void run(char *filePath) {
+void run(char *file_path) {
     /* allocates the space for the instruction
     value (its a "normal" integer value, 32 bit)*/
     int instruction;
@@ -253,7 +253,7 @@ void run(char *filePath) {
 
     /* reads the program file and sets the program
     buffer in the state */
-    readFile(filePath, &buffer, &size);
+    readFile(file_path, &buffer, &size);
     header = (struct code_header_t *) buffer;
     state.program = (unsigned int *) (buffer + sizeof(struct code_header_t));
 
@@ -303,11 +303,11 @@ int main(int argc, const char *argv[]) {
     of the file to be interpreted, checks if the number
     of arguments is greater than one and in case it is
     updates the file path with the second argument */
-    char *filePath = NULL;
-    if(argc > 1) { filePath = (char *) argv[1]; }
+    char *file_path = NULL;
+    if(argc > 1) { file_path = (char *) argv[1]; }
 
     /* runs the virtual machine */
-    run(filePath);
+    run(file_path);
 
     /* returns with no error */
     return 0;

@@ -60,10 +60,8 @@ typedef struct mingus_parser_t {
 
 #define MINGUS_CALLBACK(FOR)\
     do {\
-        if(bencodingEngine->settings.on##FOR) {\
-            if(bencodingEngine->settings.on##FOR(&parser) != 0) {\
-                RAISE_ERROR_M(RUNTIME_EXCEPTION_ERROR_CODE, (unsigned char *) "Problem handling callback"); \
-            }\
+        if(on_##FOR(&parser) != 0) {\
+            RAISE_ERROR_M(RUNTIME_EXCEPTION_ERROR_CODE, (unsigned char *) "Problem handling callback"); \
         }\
     } while(0)
 
@@ -78,8 +76,6 @@ typedef struct mingus_parser_t {
             FOR##_mark = NULL;\
         }\
     } while(0)
-
-
 
 void put_code(unsigned int instruction, FILE *file) {
     putc((instruction & 0x000000ff), file);
@@ -242,7 +238,7 @@ int main(int argc, const char *argv[]) {
     char byte;
 
     size_t index;
-    size_t fileSize;
+    size_t file_size;
 
     char *buffer;
     char *pointer;
@@ -265,7 +261,7 @@ int main(int argc, const char *argv[]) {
     /* counts the number of bytes in the asm file
     and then opens the asm file to be assembled in
     binary mode (required for parsing) */
-    countFile("c:/calc.mia", &fileSize);
+    countFile("c:/calc.mia", &file_size);
     FOPEN(&file, "c:/calc.mia", "rb");
 
     /* in case the file could not be read, returns
@@ -282,8 +278,8 @@ int main(int argc, const char *argv[]) {
 
     /* allocates the required size to read the complete file
     and then reads it completly */
-    buffer = (char *) MALLOC(fileSize);
-    fread(buffer, 1, fileSize, file);
+    buffer = (char *) MALLOC(file_size);
+    fread(buffer, 1, file_size, file);
 
     /* sets the initial pointer position to the position of
     the begining of the buffer */
@@ -304,7 +300,7 @@ int main(int argc, const char *argv[]) {
         /* checks if the pointer did not overflow the
         current buffer itartion, in case it not retrieves
         the current byte as the byte pointed */
-        if(pointer == buffer + fileSize) { break; }
+        if(pointer == buffer + file_size) { break; }
         byte = *pointer;
 
         /* switches over the current state of the parser
