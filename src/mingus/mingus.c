@@ -48,6 +48,8 @@ void mingus_eval(struct state_t *state) {
     /* retrieves the current instruction */
     struct instruction_t *instruction = &state->instruction;
 
+	/* allocates space for two (temporary) operands and
+	for a possible result from operations over them */
     int operand1;
     int operand2;
     int result;
