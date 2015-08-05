@@ -1,6 +1,6 @@
 /*
  Mingus Virtual Machine
- Copyright (C) 2008 João Magalhães
+ Copyright (c) 2008 João Magalhães
 
  This file is part of Mingus Virtual Machine.
 
