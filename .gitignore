@@ -1,0 +1,10 @@
+*.pyc
+*.ncb
+*.user
+*.suo
+
+.DS_Store
+
+/bin
+/build
+/win32/vs2008ex/*/*
