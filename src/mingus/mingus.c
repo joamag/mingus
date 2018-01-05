@@ -258,9 +258,9 @@ void mingus_eval(struct state_t *state) {
 
             /* pushes the number of arguments, the function location
             and the current program counter to the stack */
-            MINGUS_PUSH(state, instruction->arg1)
-            MINGUS_PUSH(state, instruction->immediate)
-            MINGUS_PUSH(state, state->pc)
+            MINGUS_CALL_PUSH(state, instruction->arg1)
+            MINGUS_CALL_PUSH(state, instruction->immediate)
+            MINGUS_CALL_PUSH(state, state->pc)
 
             /* updates the current program counter with the jump location
             for the function */
@@ -269,13 +269,13 @@ void mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-       /* in case it's the ret instruction */
+        /* in case it's the ret instruction */
         case RET:
             V_DEBUG_F("ret\n");
 
-            state->pc = MINGUS_POP(state);
-            MINGUS_POP(state);
-            MINGUS_POP(state);
+            state->pc = MINGUS_CALL_POP(state);
+            MINGUS_CALL_POP(state);
+            MINGUS_CALL_POP(state);
 
             /* breaks the switch */
             break;
@@ -318,7 +318,7 @@ ERROR_CODE run(char *file_path) {
 
     /* creates the virtual machine state, no program
     buffer is already set (defered loading) */
-    struct state_t state = { 1, 0, 0, NULL };
+    struct state_t state = { 1, 0, 0, 0, NULL };
 
     /* in case the provided file path is not valid raises
     and error indicating the problem */

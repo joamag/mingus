@@ -48,6 +48,10 @@
 #define MINGUS_POP(state) state->stack[state->so - 1]; state->so--
 #define MINGUS_PEEK(state) state->stack[state->so - 1]
 
+#define MINGUS_CALL_PUSH(state, value) state->call_stack[state->cso] = value; state->cso++;
+#define MINGUS_CALL_POP(state) state->call_stack[state->cso - 1]; state->cso--
+#define MINGUS_CALL_PEEK(state) state->call_stack[state->cso - 1]
+
 /**
  * Enumeration defining all the opcodes for
  * the various mingus operations.
@@ -140,6 +144,12 @@ typedef struct state_t {
      * next position of the stack to be populated.
      */
     unsigned int so;
+
+    /**
+     * The call stack index offset, that indicates the
+     * next position of the stack to be populated.
+     */
+    unsigned int cso;
 
     /**
      * The pointer to the buffer of instruction
