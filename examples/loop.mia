@@ -1,0 +1,1 @@
+loadi 10loadi 1subprintloadi 0cmp 1jmp_neq -6pop
