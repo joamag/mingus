@@ -47,10 +47,12 @@
 #define MINGUS_PUSH(state, value) state->stack[state->so] = value; state->so++;
 #define MINGUS_POP(state) state->stack[state->so - 1]; state->so--
 #define MINGUS_PEEK(state) state->stack[state->so - 1]
+#define MINGUS_PEEK_OFF(state, offset) state->stack[state->so - offset - 1]
 
 #define MINGUS_CALL_PUSH(state, value) state->call_stack[state->cso] = value; state->cso++;
 #define MINGUS_CALL_POP(state) state->call_stack[state->cso - 1]; state->cso--
 #define MINGUS_CALL_PEEK(state) state->call_stack[state->cso - 1]
+#define MINGUS_CALL_PEEK_OFF(state, offset) state->call_stack[state->cso - offset - 1]
 
 /**
  * Enumeration defining all the opcodes for
