@@ -174,6 +174,12 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
             parser->instruction->opcode = HALT;
             parser->instruction->code |= HALT << 16;
             parser->instruction = NULL;
+        } else {
+            RAISE_ERROR_F(
+                RUNTIME_EXCEPTION_ERROR_CODE,
+                (unsigned char *) "Invalid opcode %s",
+                string
+            );
         }
     }
 
@@ -297,6 +303,8 @@ ERROR_CODE run(char *file_path, char *output_path) {
     durring the parsing of the file */
     char byte;
 
+    char is_final;
+
     size_t index;
     size_t file_size;
 
@@ -379,14 +387,35 @@ ERROR_CODE run(char *file_path, char *output_path) {
     /* creates the hash map to hold the various labels */
     create_hash_map(&parser.labels, 0);
 
+    /* unsets the is final variable as the first cycle is
+    never the final one */
+    is_final = FALSE;
+
     /* iterates continuously over the file buffer to
     parse the file and generate the output */
     while(1) {
+        /* in case the is final flag as been set in the current iteration
+        breaks the current loop as the EOF character has been consumed */
+        if(is_final == TRUE) {
+            break;
+        }
+
         /* checks if the pointer did not overflow the
-        current buffer itartion, in case it not retrieves
-        the current byte as the byte pointed */
-        if(pointer == buffer + file_size) { break; }
-        byte = *pointer;
+        current buffer iteration, in that case the is final
+        flag must be set for break in next cycle */
+        if(pointer == buffer + file_size) {
+            is_final = TRUE;
+        } else {
+            is_final = FALSE;
+        }
+
+        /* retrieves the proper byte value taking into account if this is
+        the final ieteration or not */
+        if(is_final == TRUE) {
+            byte = '\0';
+        } else {
+            byte = *pointer;
+        }
 
         /* switches over the current state of the parser
         to operate accordingly over the current buffer */
@@ -404,12 +433,17 @@ ERROR_CODE run(char *file_path, char *output_path) {
                     case ' ':
                     case '\r':
                     case '\n':
+                    case '\0':
                         /* breaks the switch */
                         break;
 
                     default:
+                        /* sets the current parsing state as
+                        token to be used in the parsing loop */
                         state = TOKEN;
 
+                        /* maks the beggining of the token
+                        to be used latter in the callback */
                         MINGUS_MARK(token_end);
 
                         /* breaks the switch */
@@ -424,6 +458,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
                     case ' ':
                     case '\r':
                     case '\n':
+                    case '\0':
                         state = NORMAL;
 
                         MINGUS_CALLBACK_DATA(token_end);
@@ -443,6 +478,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
                 switch(byte) {
                     case '\r':
                     case '\n':
+                    case '\0':
                         state = NORMAL;
 
                         MINGUS_CALLBACK_DATA(comment_end);
@@ -458,6 +494,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
                 /* breaks the switch */
                 break;
         }
+
 
         /* increments the current buffer pointer
         iteration end operation */
