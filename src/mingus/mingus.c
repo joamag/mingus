@@ -74,6 +74,8 @@ void mingus_eval(struct state_t *state) {
         case LOAD:
             V_DEBUG_F("load #%08x (#%08x)\n", instruction->immediate, state->locals[instruction->immediate]);
 
+			/* loads the value located at the immediate location to the stack and
+			increments the stack pointer by such value */
             state->stack[state->so] = state->locals[instruction->immediate];
             state->so++;
 

@@ -94,8 +94,9 @@ typedef struct instruction_t {
 } instruction;
 
 /**
- * Structure describing a state of the
- * mingus virtual machine.
+ * Structure describing a state of the Mingus
+ * virtual machine, a 32 bit based computer like
+ * VM for testing purposes.
  */
 typedef struct state_t {
     /**
@@ -111,7 +112,7 @@ typedef struct state_t {
     unsigned int pc;
 
     /**
-     * The stack index offset, that indicated the
+     * The stack index offset, that indicates the
      * next position of the stack to be populated.
      */
     unsigned int so;
