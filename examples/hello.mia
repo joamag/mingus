@@ -1,0 +1,7 @@
+.data
+    hello: 'Hello world!'
+
+.text
+    load hello
+    prints
+    pop

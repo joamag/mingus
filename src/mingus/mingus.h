@@ -73,7 +73,7 @@ typedef enum opcodes_e {
     CALL,
     RET,
     PRINT,
-	PRINTS
+    PRINTS
 } opcodes;
 
 typedef struct code_header_t {

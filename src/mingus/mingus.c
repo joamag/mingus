@@ -247,8 +247,8 @@ void mingus_eval(struct state_t *state) {
         case JMP_ABS:
             V_DEBUG_F("jmp_abs #%08x\n", instruction->immediate);
 
-			/* updates the program counter to the immediate
-			value of the current instruction (long jump) */
+            /* updates the program counter to the immediate
+            value of the current instruction (long jump) */
             state->pc = instruction->immediate;
 
             /* breaks the switch */

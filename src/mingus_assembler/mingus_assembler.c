@@ -43,8 +43,19 @@ typedef enum mingus_states_e {
     COMMENT
 } mingus_states;
 
+/**
+ * The multiple sections that exist under
+ * the mingus assembly code.
+ */
+typedef enum mingus_sections_e {
+    TEXT = 1,
+    DATA
+} mingus_sections;
+
 typedef struct mingus_parser_t {
     FILE *output;
+    enum mingus_states_e state;
+    enum mingus_sections_e section;
     size_t instruction_count;
     struct instructionf_t *instruction;
     struct instructionf_t instructions[1024];
@@ -95,8 +106,20 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
     memcpy(string, pointer, size);
     string[size] = '\0';
 
+    /* in case the string starts with a dot it must represent a section
+    changer and must be treated as such */
     if(string[0] == '.') {
-        /* its's a section changer */
+        if(strcmp(string, ".text") == 0) {
+            parser->section = TEXT;
+        } else if(strcmp(string, ".data") == 0) {
+            parser->section = DATA;
+        } else {
+            RAISE_ERROR_F(
+                RUNTIME_EXCEPTION_ERROR_CODE,
+                (unsigned char *) "Invalid section %s",
+                string
+            );
+        }
     }
 
     /* otherwise in case the last character in the string is a
@@ -336,10 +359,6 @@ ERROR_CODE run(char *file_path, char *output_path) {
     to be used as the output of the bytecode */
     FILE *out;
 
-    /* starts the parser initial state as the
-    normal state in between operations */
-    enum mingus_states_e state = NORMAL;
-
     /* counts the number of bytes in the asm file
     and then opens the asm file to be assembled in
     binary mode (required for parsing) */
@@ -386,6 +405,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
 
     /* updates the parser structure setting the appropriate
     output file (buffer) and the initial opcode value */
+    parser.state = NORMAL;
     parser.output = out;
     parser.instruction = NULL;
     parser.instruction_count = 0;
@@ -425,11 +445,11 @@ ERROR_CODE run(char *file_path, char *output_path) {
 
         /* switches over the current state of the parser
         to operate accordingly over the current buffer */
-        switch(state) {
+        switch(parser.state) {
             case NORMAL:
                 switch(byte) {
                     case ';':
-                        state = COMMENT;
+                        parser.state = COMMENT;
 
                         MINGUS_MARK(comment_end);
 
@@ -446,7 +466,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
                     default:
                         /* sets the current parsing state as
                         token to be used in the parsing loop */
-                        state = TOKEN;
+                        parser.state = TOKEN;
 
                         /* maks the beggining of the token
                         to be used latter in the callback */
@@ -465,7 +485,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
                     case '\r':
                     case '\n':
                     case '\0':
-                        state = NORMAL;
+                        parser.state = NORMAL;
 
                         MINGUS_CALLBACK_DATA(token_end);
 
@@ -485,7 +505,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
                     case '\r':
                     case '\n':
                     case '\0':
-                        state = NORMAL;
+                        parser.state = NORMAL;
 
                         MINGUS_CALLBACK_DATA(comment_end);
 
