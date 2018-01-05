@@ -296,6 +296,21 @@ void mingus_eval(struct state_t *state) {
 
             /* breaks the switch */
             break;
+
+        /* in case it's the prints instruction */
+        case PRINTS:
+            V_DEBUG_F("prints #%08x\n", state->stack[state->so - 1]);
+
+            /* verifies the condition for the instruction
+            execution without any problem */
+            assert(state->so > 0);
+
+            /* retrieves the current top value from the stack and
+            prints the string in such address to the standard output */
+            PRINTF_F("%s\n", &state->stack[state->so - 1]);
+
+            /* breaks the switch */
+            break;
     }
 }
 

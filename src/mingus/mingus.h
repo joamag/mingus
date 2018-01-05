@@ -72,7 +72,8 @@ typedef enum opcodes_e {
     JMP_ABS,
     CALL,
     RET,
-    PRINT
+    PRINT,
+	PRINTS
 } opcodes;
 
 typedef struct code_header_t {
