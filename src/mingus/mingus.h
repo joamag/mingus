@@ -45,7 +45,7 @@
 #define MINGUS_CODE_VERSION 1
 
 #define MINGUS_PUSH(state, value) state->stack[state->so] = value; state->so++;
-#define MINGUS_POP(state) state->stack[state->so]; state->so--
+#define MINGUS_POP(state) state->stack[state->so - 1]; state->so--
 #define MINGUS_PEEK(state) state->stack[state->so]
 
 /**

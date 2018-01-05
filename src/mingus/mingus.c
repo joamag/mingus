@@ -117,8 +117,8 @@ void mingus_eval(struct state_t *state) {
 
             /* retrieves both operands from the stack and then pops
             both elements from it */
-            operand1 = MINGUS_POP(state);
             operand2 = MINGUS_POP(state);
+            operand1 = MINGUS_POP(state);
 
             /* adds the values on top of the stack and then
             sets the sum in the top of the stack */
@@ -137,8 +137,8 @@ void mingus_eval(struct state_t *state) {
 
             /* retrieves both operands from the stack and then pops
             both elements from it */
-            operand1 = MINGUS_POP(state);
             operand2 = MINGUS_POP(state);
+            operand1 = MINGUS_POP(state);
 
             /* subtracts the values on top of the stack and then
             sets the subtraction in the top of the stack */
