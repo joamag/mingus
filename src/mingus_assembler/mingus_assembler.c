@@ -89,6 +89,8 @@ void put_buffer(char *buffer, size_t size, FILE *file) {
 }
 
 ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t size) {
+    /* allocates space for the token string to be parsed and
+    copies the contents from the current pointer to it */
     char *string = MALLOC(size + 1);
     memcpy(string, pointer, size);
     string[size] = '\0';
@@ -113,6 +115,8 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
         (this is the instruction counteter) */
         parser->instruction_count++;
 
+        /* initializes the new instruction that has been created
+        with the default values (as expecteed) */
         parser->instruction->code = 0x00000000;
         parser->instruction->opcode = UNSET_OPCODE;
         parser->instruction->arg1 = _UNDEFINED;
@@ -184,8 +188,10 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
 
             case JMP:
             case JMP_EQ:
+            case JMP_NEQ:
                 if(parser->instruction->immediate == _UNDEFINED) {
-                    memcpy(parser->instruction->string, string, size + 1);
+                    parser->instruction->immediate = atoi(string);
+                    parser->instruction->code |= (unsigned char) parser->instruction->immediate;
                     parser->instruction = NULL;
                 }
 
@@ -225,6 +231,53 @@ ERROR_CODE on_comment_end(struct mingus_parser_t *parser, char *pointer, size_t 
     RAISE_NO_ERROR;
 }
 
+ERROR_CODE add_instruction(
+    struct mingus_parser_t *parser,
+    enum opcodes_e opcode,
+    char arg1,
+    char arg2,
+    char arg3,
+    char immediate
+) {
+    /* sets the current instruction pointer in the
+    parser for correct execution */
+    parser->instruction = &parser->instructions[parser->instruction_count];
+
+    /* increments the number of instruction processed
+    (this is the instruction counteter) */
+    parser->instruction_count++;
+
+    /* initializes the parser's instruction code with
+    the default values (no issue) */
+    parser->instruction->code = 0x00000000;
+    parser->instruction->opcode = opcode;
+    parser->instruction->arg1 = arg1;
+    parser->instruction->arg2 = arg2;
+    parser->instruction->arg3 = arg3;
+    parser->instruction->immediate = immediate;
+    parser->instruction->position = parser->instruction_count;
+
+    parser->instruction->code |= parser->instruction->opcode << 16;
+
+    if(arg1 != _UNDEFINED) {
+        parser->instruction->code |= parser->instruction->arg1 << 8;
+    }
+
+    if(arg2 != _UNDEFINED) {
+        parser->instruction->code |= parser->instruction->arg2 << 4;
+    }
+
+    if(arg3 != _UNDEFINED) {
+        parser->instruction->code |= parser->instruction->arg3;
+    }
+
+    if(immediate != _UNDEFINED) {
+        parser->instruction->code |= parser->instruction->immediate;
+    }
+
+    RAISE_NO_ERROR;
+}
+
 ERROR_CODE run(char *file_path, char *output_path) {
     /* allocates the value to be used to verify the
     exitence of error from the function */
@@ -245,11 +298,13 @@ ERROR_CODE run(char *file_path, char *output_path) {
     struct code_t code;
     struct mingus_parser_t parser;
 
-    FILE *out;
-
     /* allocates space for the file structure to
     hold the reference to be assembled */
     FILE *file;
+
+    /* allocates space for the file that is going
+    to be used as the output of the bytecode */
+    FILE *out;
 
     /* starts the parser initial state as the
     normal state in between operations */
@@ -393,27 +448,27 @@ ERROR_CODE run(char *file_path, char *output_path) {
         pointer++;
     }
 
+    /* adds the "final" halt instruction to the output so that
+    the virtual machine is always returned on the final stage */
+    add_instruction(&parser, HALT, _UNDEFINED, _UNDEFINED, _UNDEFINED, _UNDEFINED);
+
+    /* copies the magic symbol to the beginning  of the code and
+    then sets a series of default values on the global header */
     memcpy(code.header.magic, "MING", 4);
     code.header.version = MINGUS_CODE_VERSION;
     code.header.data_size = 0;
     code.header.code_size = parser.instruction_count * sizeof(int);
 
+    /* retrieves the reference to the header structure and ouputs it
+    directly to the parser output buffer */
     put_buffer((char *) &code.header, sizeof(struct code_header_t), parser.output);
 
+    /* iterates over the complete set of instructions to ouput the code
+    of it into the output buffer (directly from structure) */
     for(index = 0; index < parser.instruction_count; index++) {
         /* sets the current instruction pointer in the
         parser for correct execution */
         parser.instruction = &parser.instructions[index];
-
-        switch(parser.instruction->opcode) {
-            case JMP:
-            case JMP_EQ:
-                get_value_string_hash_map(parser.labels, parser.instruction->string, (void **) &parser.instruction->immediate);
-                parser.instruction->code |= (unsigned char) (parser.instruction->immediate - parser.instruction->position);
-
-                break;
-        }
-
         put_code(parser.instruction->code, parser.output);
     }
 
