@@ -10,5 +10,5 @@ add
 print
 
 ; removes the current value on top of the stack
-; so that the vm exists in an empty state
+; so that the vm exits in an empty state
 pop
