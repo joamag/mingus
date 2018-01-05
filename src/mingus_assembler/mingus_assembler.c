@@ -48,7 +48,7 @@ typedef struct mingus_parser_t {
     size_t instruction_count;
     struct instruction_t *instruction;
     struct instruction_t instructions[1024];
-    struct HashMap_t *labels;
+    struct hash_map_t *labels;
 } mingus_parser;
 
 #define MINGUS_MARK(FOR) MINGUS_MARK_N(FOR, 0)

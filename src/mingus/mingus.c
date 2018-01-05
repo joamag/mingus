@@ -74,8 +74,8 @@ void mingus_eval(struct state_t *state) {
         case LOAD:
             V_DEBUG_F("load #%08x (#%08x)\n", instruction->immediate, state->locals[instruction->immediate]);
 
-			/* loads the value located at the immediate location to the stack and
-			increments the stack pointer by such value */
+            /* loads the value located at the immediate location to the stack and
+            increments the stack pointer by such value */
             state->stack[state->so] = state->locals[instruction->immediate];
             state->so++;
 
@@ -228,8 +228,8 @@ void mingus_eval(struct state_t *state) {
             execution without any problem */
             assert(state->so > 0);
 
-			/* retrieves the current top value from the stack and
-			prints it decrementing the stack pointer value */
+            /* retrieves the current top value from the stack and
+            prints it decrementing the stack pointer value */
             PRINTF_F("%d\n", state->stack[state->so - 1]);
             state->so--;
 
