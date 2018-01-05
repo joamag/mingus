@@ -247,7 +247,7 @@ void mingus_eval(struct state_t *state) {
 
        /* in case it's the call instruction */
         case CALL:
-            V_DEBUG_F("call #%08x\n", state->stack[state->so - 1]);
+            V_DEBUG_F("call #%08x %d\n", instruction->immediate, instruction->arg1);
 
             /* pushes the number of arguments, the function location
             and the current program counter to the stack */
