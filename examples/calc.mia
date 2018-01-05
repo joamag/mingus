@@ -1,1 +1,1 @@
-loadi 2loadi 4addprintpop
+; loads two values into the stack and runs the; add operation to sum them together, putting; the result on top of the stackloadi 2loadi 4add; prints the resulting value, that should be; on top of the stackprint; removes the current value on top of the stack; so that the vm exists in an empty statepop
