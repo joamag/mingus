@@ -176,9 +176,7 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
             case STORE:
                 if(parser->instruction->immediate == _UNDEFINED) {
                     parser->instruction->immediate = atoi(string);
-
                     parser->instruction->code |= (unsigned char) parser->instruction->immediate;
-
                     parser->instruction = NULL;
                 }
 
@@ -200,9 +198,7 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
             case CMP:
                 if(parser->instruction->arg1 == _UNDEFINED) {
                     parser->instruction->arg1 = atoi(string);
-
                     parser->instruction->code |= parser->instruction->arg1 << 8;
-
                     parser->instruction = NULL;
                 }
 
@@ -229,12 +225,11 @@ ERROR_CODE on_comment_end(struct mingus_parser_t *parser, char *pointer, size_t 
     RAISE_NO_ERROR;
 }
 
+ERROR_CODE run(char *file_path, char *output_path) {
+    /* allocates the value to be used to verify the
+    exitence of error from the function */
+    ERROR_CODE return_value;
 
-
-
-
-
-int main(int argc, const char *argv[]) {
     /* allocates space for the byte to be used
     durring the parsing of the file */
     char byte;
@@ -263,20 +258,37 @@ int main(int argc, const char *argv[]) {
     /* counts the number of bytes in the asm file
     and then opens the asm file to be assembled in
     binary mode (required for parsing) */
-    count_file("d:/calc.mia", &file_size);
-    FOPEN(&file, "d:/calc.mia", "rb");
+    return_value = count_file(file_path, &file_size);
+    if(IS_ERROR_CODE(return_value)) {
+        RAISE_ERROR_F(
+            RUNTIME_EXCEPTION_ERROR_CODE,
+            (unsigned char *) "Problem couting file %s",
+            file_path
+        );
+    }
 
-    /* in case the file could not be read, returns
-    immediately in error */
-    if(file == NULL) { PRINTF("error reading file"); return 1; }
+    /* tries to read the file contents and in case there's
+    an issue with the reading raises an error */
+    FOPEN(&file, file_path, "rb");
+    if(file == NULL) {
+        RAISE_ERROR_F(
+            RUNTIME_EXCEPTION_ERROR_CODE,
+            (unsigned char *) "Problem opening file %s",
+            file_path
+        );
+    }
 
     /* tries to open the output file in writing mode,
-    this is the file to old the assembled code */
-    FOPEN(&out, "d:/calc.moc", "wb");
-
-    /* in case the file could not be opened, returns
-    immediately in error */
-    if(out == NULL) { PRINTF("error opening output file"); return 1; }
+    this is the file to old the assembled code and in
+    case there's an issue with the opening raises an error*/
+    FOPEN(&out, output_path, "wb");
+    if(out == NULL) {
+        RAISE_ERROR_F(
+            RUNTIME_EXCEPTION_ERROR_CODE,
+            (unsigned char *) "Problem opening output file %s",
+            file_path
+        );
+    }
 
     /* allocates the required size to read the complete file
     and then reads it completly */
@@ -418,5 +430,31 @@ int main(int argc, const char *argv[]) {
     fclose(file);
 
     /* retuns with no error (normal return) */
+    RAISE_NO_ERROR;
+}
+
+int main(int argc, const char *argv[]) {
+    /* allocates the value to be used to verify the
+    exitence of error from the function */
+    ERROR_CODE return_value;
+
+    /* allocates and starts the pointer to the path
+    of the file to be interpreted, checks if the number
+    of arguments is greater than one and in case it is
+    updates the file path with the second argument */
+    char *file_path = NULL;
+    char *output_path = NULL;
+    if(argc > 1) { file_path = (char *) argv[1]; }
+    if(argc > 2) { output_path = (char *) argv[2]; }
+
+    /* runs the virtual machine and verifies if an error
+    as occured, if that's the case prints it */
+    return_value = run(file_path, output_path);
+    if(IS_ERROR_CODE(return_value)) {
+        V_ERROR_F("Fatal error (%s)\n", (char *) GET_ERROR());
+        RAISE_AGAIN(return_value);
+    }
+
+    /* returns with no error */
     return 0;
 }

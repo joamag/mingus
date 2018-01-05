@@ -220,6 +220,21 @@ void mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
+        /* in case it's the jmp neq operation */
+        case JMP_NEQ:
+            V_DEBUG_F("jmp_neq %02x #%08x\n", instruction->immediate, state->stack[state->so - 1]);
+
+            /* verifies the condition for the instruction
+            execution without any problem */
+            assert(state->so > 0);
+
+            if(state->stack[state->so - 1] == 0) {
+                state->pc += instruction->immediate;
+            }
+
+            /* breaks the switch */
+            break;
+
         /* in case it's the print instruction */
         case PRINT:
             V_DEBUG_F("print #%08x\n", state->stack[state->so - 1]);
@@ -229,16 +244,19 @@ void mingus_eval(struct state_t *state) {
             assert(state->so > 0);
 
             /* retrieves the current top value from the stack and
-            prints it decrementing the stack pointer value */
+            prints it to the standard output */
             PRINTF_F("%d\n", state->stack[state->so - 1]);
-            state->so--;
 
             /* breaks the switch */
             break;
     }
 }
 
-void run(char *file_path) {
+ERROR_CODE run(char *file_path) {
+    /* allocates the value to be used to verify the
+    exitence of error from the function */
+    ERROR_CODE return_value;
+
     /* allocates the space for the instruction
     value (its a "normal" integer value, 32 bit)*/
     int instruction;
@@ -257,9 +275,28 @@ void run(char *file_path) {
     buffer is already set (defered loading) */
     struct state_t state = { 1, 0, 0, NULL };
 
-    /* reads the program file and sets the program
-    buffer in the state */
-    read_file(file_path, &buffer, &size);
+    /* in case the provided file path is not valid raises
+    and error indicating the problem */
+    if(file_path == NULL) {
+        RAISE_ERROR_M(
+            RUNTIME_EXCEPTION_ERROR_CODE,
+            (unsigned char *) "No input file"
+        );
+    }
+
+    /* reads the program file and verifies if there was an
+    error if that's the case return immediately */
+    return_value = read_file(file_path, &buffer, &size);
+    if(IS_ERROR_CODE(return_value)) {
+        RAISE_ERROR_F(
+            RUNTIME_EXCEPTION_ERROR_CODE,
+            (unsigned char *) "Problem reading file %s",
+            file_path
+        );
+    }
+
+    /* sets the program buffer in the state, effectively initializing
+    the virtual machine */
     header = (struct code_header_t *) buffer;
     state.program = (unsigned int *) (buffer + sizeof(struct code_header_t));
 
@@ -275,6 +312,9 @@ void run(char *file_path) {
         mingus_decode(&state, instruction);
         mingus_eval(&state);
     }
+
+    /* normal returns of the function with no error */
+    RAISE_NO_ERROR;
 }
 
 void show_stack(struct state_t *state) {
@@ -305,6 +345,10 @@ void show_stack(struct state_t *state) {
 }
 
 int main(int argc, const char *argv[]) {
+    /* allocates the value to be used to verify the
+    exitence of error from the function */
+    ERROR_CODE return_value;
+
     /* allocates and starts the pointer to the path
     of the file to be interpreted, checks if the number
     of arguments is greater than one and in case it is
@@ -312,8 +356,13 @@ int main(int argc, const char *argv[]) {
     char *file_path = NULL;
     if(argc > 1) { file_path = (char *) argv[1]; }
 
-    /* runs the virtual machine */
-    run(file_path);
+    /* runs the virtual machine and verifies if an error
+    as occured, if that's the case prints it */
+    return_value = run(file_path);
+    if(IS_ERROR_CODE(return_value)) {
+        V_ERROR_F("Fatal error (%s)\n", (char *) GET_ERROR());
+        RAISE_AGAIN(return_value);
+    }
 
     /* returns with no error */
     return 0;
