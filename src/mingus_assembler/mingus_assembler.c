@@ -46,8 +46,8 @@ typedef enum mingus_states_e {
 typedef struct mingus_parser_t {
     FILE *output;
     size_t instruction_count;
-    struct instruction_t *instruction;
-    struct instruction_t instructions[1024];
+    struct instructionf_t *instruction;
+    struct instructionf_t instructions[1024];
     struct hash_map_t *labels;
 } mingus_parser;
 
@@ -98,12 +98,15 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
     if(string[0] == '.') {
         /* its's a section changer */
     }
+
     /* otherwise in case the last character in the string is a
     colon this token is considered to be a label */
     else if(string[size - 1] == ':') {
         string[size - 1] = '\0';
         set_value_string_hash_map(parser->labels, string, (void *) parser->instruction_count);
+        V_DEBUG_F("label '%s' #%08x\n", string, parser->instruction_count);
     }
+
     /* otherwise it's considered to be an opcode reference
     and should be processed normally */
     else if(parser->instruction == NULL) {
@@ -124,6 +127,8 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
         parser->instruction->arg3 = _UNDEFINED;
         parser->instruction->immediate = _UNDEFINED;
         parser->instruction->position = parser->instruction_count;
+
+        V_DEBUG_F("opcode '%s'\n", string);
 
         if(strcmp(string, "load") == 0) {
             parser->instruction->opcode = LOAD;
@@ -152,13 +157,13 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
         } else if(strcmp(string, "jmp") == 0) {
             parser->instruction->opcode = JMP;
             parser->instruction->code |= JMP << 16;
-        } else if(strcmp(string, "jmp_eq") == 0) {
+        } else if(strcmp(string, "jmp_eq") == 0 || strcmp(string, "jeq") == 0) {
             parser->instruction->opcode = JMP_EQ;
             parser->instruction->code |= JMP_EQ << 16;
-        } else if(strcmp(string, "jmp_neq") == 0) {
+        } else if(strcmp(string, "jmp_neq") == 0 || strcmp(string, "jneq") == 0) {
             parser->instruction->opcode = JMP_NEQ;
             parser->instruction->code |= JMP_NEQ << 16;
-        } else if(strcmp(string, "jmp_abs") == 0) {
+        } else if(strcmp(string, "jmp_abs") == 0 || strcmp(string, "jabs") == 0) {
             parser->instruction->opcode = JMP_ABS;
             parser->instruction->code |= JMP_ABS << 16;
         } else if(strcmp(string, "print") == 0)  {
@@ -170,7 +175,11 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
             parser->instruction->code |= HALT << 16;
             parser->instruction = NULL;
         }
-    } else {
+    }
+
+    /* otherwise it should be one of the operands to the processing
+    of the current context, should add more information */
+    else {
         switch(parser->instruction->opcode) {
             case HALT:
                 break;
@@ -190,6 +199,7 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
             case JMP_EQ:
             case JMP_NEQ:
                 if(parser->instruction->immediate == _UNDEFINED) {
+                    memcpy(parser->instruction->string, string, size + 1);
                     parser->instruction->immediate = atoi(string);
                     parser->instruction->code |= (unsigned char) parser->instruction->immediate;
                     parser->instruction = NULL;
@@ -295,7 +305,13 @@ ERROR_CODE run(char *file_path, char *output_path) {
     char *token_end_mark;
     char *comment_end_mark;
 
+    size_t address;
+    struct instructionf_t *instruction;
+
     struct code_t code;
+
+    /* creates the parser structure, considered to be
+    the major one for the creation of the output code */
     struct mingus_parser_t parser;
 
     /* allocates space for the file structure to
@@ -452,6 +468,23 @@ ERROR_CODE run(char *file_path, char *output_path) {
     the virtual machine is always returned on the final stage */
     add_instruction(&parser, HALT, _UNDEFINED, _UNDEFINED, _UNDEFINED, _UNDEFINED);
 
+    /* iterates over the complete set of instructions to run a series
+    of post-processing operations on all of them */
+    for(index = 0; index < parser.instruction_count; index++) {
+        instruction = &parser.instructions[index];
+        switch(instruction->opcode) {
+            case JMP:
+            case JMP_EQ:
+            case JMP_NEQ:
+                get_value_string_hash_map(parser.labels, instruction->string, (void **) &address);
+                if(address != (size_t) NULL) {
+                    instruction->immediate = address - instruction->position;
+                    instruction->code |= (unsigned char) instruction->immediate;
+                }
+                break;
+        }
+    }
+
     /* copies the magic symbol to the beginning  of the code and
     then sets a series of default values on the global header */
     memcpy(code.header.magic, "MING", 4);
@@ -468,12 +501,12 @@ ERROR_CODE run(char *file_path, char *output_path) {
     for(index = 0; index < parser.instruction_count; index++) {
         /* sets the current instruction pointer in the
         parser for correct execution */
-        parser.instruction = &parser.instructions[index];
-        put_code(parser.instruction->code, parser.output);
+        instruction = &parser.instructions[index];
+        put_code(instruction->code, parser.output);
     }
 
     /* prints a logging message indicating the results
-    of the assembling */
+    of the assembling, for debugging purposes */
     PRINTF_F("Processed %d instructions...\n", parser.instruction_count);
 
     /* releases the buffer, to avoid any memory leaking */

@@ -89,9 +89,27 @@ typedef struct instruction_t {
     char arg2;
     char arg3;
     char immediate;
-    char string[128];
     unsigned int position;
 } instruction;
+
+/**
+ * Structure describing a full instruction (for
+ * assembling) inside mingus virtual machine.
+ *
+ * This version of the instruction structure should
+ * not be used for runtime environments to avoid
+ * spending unnecessary memory.
+ */
+typedef struct instructionf_t {
+    int code;
+    enum opcodes_e opcode;
+    char arg1;
+    char arg2;
+    char arg3;
+    char immediate;
+    char string[128];
+    unsigned int position;
+} instructionf;
 
 /**
  * Structure describing a state of the Mingus
