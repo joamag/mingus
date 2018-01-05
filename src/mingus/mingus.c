@@ -228,6 +228,8 @@ void mingus_eval(struct state_t *state) {
             execution without any problem */
             assert(state->so > 0);
 
+			/* retrieves the current top value from the stack and
+			prints it decrementing the stack pointer value */
             PRINTF_F("%d\n", state->stack[state->so - 1]);
             state->so--;
 

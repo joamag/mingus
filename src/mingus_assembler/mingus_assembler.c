@@ -263,8 +263,8 @@ int main(int argc, const char *argv[]) {
     /* counts the number of bytes in the asm file
     and then opens the asm file to be assembled in
     binary mode (required for parsing) */
-    count_file("c:/calc.mia", &file_size);
-    FOPEN(&file, "c:/calc.mia", "rb");
+    count_file("d:/calc.mia", &file_size);
+    FOPEN(&file, "d:/calc.mia", "rb");
 
     /* in case the file could not be read, returns
     immediately in error */
@@ -272,7 +272,7 @@ int main(int argc, const char *argv[]) {
 
     /* tries to open the output file in writing mode,
     this is the file to old the assembled code */
-    FOPEN(&out, "c:/calc.moc", "wb");
+    FOPEN(&out, "d:/calc.moc", "wb");
 
     /* in case the file could not be opened, returns
     immediately in error */
