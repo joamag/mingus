@@ -2,6 +2,13 @@
 
 A small and simple VM infra-structure.
 
+## Usage
+
+```bash
+mingua example.mia
+mingus example.mio
+```
+
 ## Examples
 
 A series of examples may be found [here](examples).
