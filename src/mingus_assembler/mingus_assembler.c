@@ -538,6 +538,13 @@ ERROR_CODE run(char *file_path, char *output_path) {
                     instruction->code |= (unsigned char) instruction->immediate;
                 }
                 break;
+
+			case CALL:
+				get_value_string_hash_map(parser.labels, instruction->string, (void **) &address);
+                if(address != (size_t) NULL) {
+                    instruction->immediate = address;
+                }
+                break;
         }
     }
 
