@@ -1,1 +1,25 @@
-; loads the initial counter valueloadi 10start:; compares the current value with zero and if; that's the case jumps to the endloadi 0cmp 1jeq end; subtracts one value from the current value; and prints the valueloadi 1subprint; jumps to the current loopjmp start; the final part of the executionend:pop
+; loads the initial counter value
+loadi 10
+
+; sets the starting point of the loop
+; as this position
+start:
+
+; compares the current value with zero and if
+; that's the case jumps to the end
+loadi 0
+cmp 1
+jeq end
+
+; subtracts one value from the current value
+; and prints the value
+loadi 1
+sub
+print
+
+; jumps to the current loop
+jmp start
+
+; the final part of the execution
+end:
+pop
