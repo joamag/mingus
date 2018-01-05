@@ -65,8 +65,8 @@ void mingus_eval(struct state_t *state) {
             execution without any problem */
             assert(state->so == 0);
 
-            /* unsets the runnig flag */
-            state->running = 0;
+            /* unsets the running flag */
+            state->running = FALSE;
 
             /* breaks the switch */
             break;
@@ -171,9 +171,8 @@ void mingus_eval(struct state_t *state) {
 
             /* retrieves both operands from the stack and then pops
             the second element from it */
-            operand1 = state->stack[state->so - 2];
-            operand2 = state->stack[state->so - 1];
-            state->so -= 1;
+            operand2 = MINGUS_POP(state);
+            operand1 = MINGUS_PEEK(state);
 
             /* switches over the kind of comparison that is going
             to be performed */
@@ -187,8 +186,8 @@ void mingus_eval(struct state_t *state) {
                     break;
             }
 
-            state->stack[state->so] = result;
-            state->so++;
+            /* pushes the result of the comparison to the stack */
+            MINGUS_PUSH(state, result);
 
             /* breaks the switch */
             break;
@@ -197,6 +196,8 @@ void mingus_eval(struct state_t *state) {
         case JMP:
             V_DEBUG_F("jmp %d\n", instruction->immediate);
 
+            /* incrments the program counter with the immediate
+            value of this (relative) jump operation */
             state->pc += instruction->immediate;
 
             /* breaks the switch */
@@ -210,14 +211,14 @@ void mingus_eval(struct state_t *state) {
             execution without any problem */
             assert(state->so > 0);
 
-            /* compres the current stack top with zero (comparision
+            /* pops the current stack result as the pop value */
+            result = MINGUS_POP(state);
+
+            /* compares the current stack top with zero (comparision
             verified) and increments the program counter if that's the case */
-            if(state->stack[state->so - 1] == 1) {
+            if(result == 1) {
                 state->pc += instruction->immediate;
             }
-
-            /* pops the top element from the stack */
-            state->so--;
 
             /* breaks the switch */
             break;
@@ -230,14 +231,14 @@ void mingus_eval(struct state_t *state) {
             execution without any problem */
             assert(state->so > 0);
 
-            /* compres the current stack top with zero (comparision
+            /* pops the current stack result as the pop value */
+            result = MINGUS_POP(state);
+
+            /* compares the current stack top with zero (comparision
             failed) and increments the program counter if that's the case */
-            if(state->stack[state->so - 1] == 0) {
+            if(result == 0) {
                 state->pc += instruction->immediate;
             }
-
-            /* pops the top element from the stack */
-            state->so--;
 
             /* breaks the switch */
             break;
@@ -343,9 +344,10 @@ ERROR_CODE run(char *file_path) {
     the virtual machine */
     header = (struct code_header_t *) buffer;
     state.program = (unsigned int *) (buffer + sizeof(struct code_header_t));
+    state.running = TRUE;
 
     /* iterates while the running flag is set */
-    while(state.running) {
+    while(state.running == TRUE) {
         /* shows the stack, to the default output
         buffer (standard output) */
         show_stack(&state);

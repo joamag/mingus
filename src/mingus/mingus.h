@@ -46,7 +46,7 @@
 
 #define MINGUS_PUSH(state, value) state->stack[state->so] = value; state->so++;
 #define MINGUS_POP(state) state->stack[state->so - 1]; state->so--
-#define MINGUS_PEEK(state) state->stack[state->so]
+#define MINGUS_PEEK(state) state->stack[state->so - 1]
 
 /**
  * Enumeration defining all the opcodes for
