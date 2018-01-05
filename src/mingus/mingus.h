@@ -46,6 +46,7 @@
 
 #define MINGUS_PUSH(state, value) state->stack[state->so] = value; state->so++;
 #define MINGUS_POP(state) state->stack[state->so]; state->so--
+#define MINGUS_PEEK(state) state->stack[state->so]
 
 /**
  * Enumeration defining all the opcodes for
@@ -152,6 +153,13 @@ typedef struct state_t {
      * which the virtual machine can operate.
      */
     int stack[STACK_SIZE];
+
+    /**
+     * The special purpose stack to be used only for calling
+     * purposes. Should store things like funciotn address
+     * original program counter and number of arguments.
+     */
+    int call_stack[STACK_SIZE];
 
     /**
      * The current set of local variables that can be

@@ -526,6 +526,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
                 }
                 break;
 
+            case JMP_ABS:
             case CALL:
                 get_value_string_hash_map(parser.labels, instruction->string, (void **) &address);
                 if(address != (size_t) NULL) {

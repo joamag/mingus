@@ -101,8 +101,8 @@ void mingus_eval(struct state_t *state) {
             execution without any problem */
             assert(state->so > 0);
 
-            state->locals[instruction->immediate] = state->stack[state->so - 1];
-            state->so--;
+            /* stores the top of the stack in the local storage */
+            state->locals[instruction->immediate] = MINGUS_POP(state);
 
             /* breaks the switch */
             break;
@@ -117,14 +117,12 @@ void mingus_eval(struct state_t *state) {
 
             /* retrieves both operands from the stack and then pops
             both elements from it */
-            operand1 = state->stack[state->so - 2];
-            operand2 = state->stack[state->so - 1];
-            state->so -= 2;
+            operand1 = MINGUS_POP(state);
+            operand2 = MINGUS_POP(state);
 
             /* adds the values on top of the stack and then
             sets the sum in the top of the stack */
-            state->stack[state->so] = operand1 + operand2;
-            state->so++;
+            MINGUS_PUSH(state, operand1 + operand2);
 
             /* breaks the switch */
             break;
@@ -139,14 +137,12 @@ void mingus_eval(struct state_t *state) {
 
             /* retrieves both operands from the stack and then pops
             both elements from it */
-            operand1 = state->stack[state->so - 2];
-            operand2 = state->stack[state->so - 1];
-            state->so -= 2;
+            operand1 = MINGUS_POP(state);
+            operand2 = MINGUS_POP(state);
 
-            /* adds the values on top of the stack and then
-            sets the sum in the top of the stack */
-            state->stack[state->so] = operand1 - operand2;
-            state->so++;
+            /* subtracts the values on top of the stack and then
+            sets the subtraction in the top of the stack */
+            MINGUS_PUSH(state, operand1 - operand2);
 
             /* breaks the switch */
             break;
@@ -160,7 +156,7 @@ void mingus_eval(struct state_t *state) {
             assert(state->so > 0);
 
             /* pops the top element from the stack */
-            state->so--;
+            MINGUS_POP(state);
 
             /* breaks the switch */
             break;
@@ -246,7 +242,16 @@ void mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-       /* in case it's the call instruction */
+        /* in case it's the jmp abs operation */
+        case JMP_ABS:
+            V_DEBUG_F("jmp_abs #%08x\n", instruction->immediate);
+
+            state->pc = instruction->immediate;
+
+            /* breaks the switch */
+            break;
+
+        /* in case it's the call instruction */
         case CALL:
             V_DEBUG_F("call #%08x %d\n", instruction->immediate, instruction->arg1);
 

@@ -13,4 +13,5 @@ simple_sum:
 add
 loadi 1
 add
+halt
 ret
