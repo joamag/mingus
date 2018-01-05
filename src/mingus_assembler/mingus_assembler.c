@@ -132,53 +132,38 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
 
         if(strcmp(string, "load") == 0) {
             parser->instruction->opcode = LOAD;
-            parser->instruction->code |= LOAD << 16;
         } else if(strcmp(string, "loadi") == 0) {
             parser->instruction->opcode = LOADI;
-            parser->instruction->code |= LOADI << 16;
         } else if(strcmp(string, "store") == 0) {
             parser->instruction->opcode = STORE;
-            parser->instruction->code |= STORE << 16;
         } else if(strcmp(string, "add") == 0) {
             parser->instruction->opcode = ADD;
-            parser->instruction->code |= ADD << 16;
             parser->instruction = NULL;
         } else if(strcmp(string, "sub") == 0) {
             parser->instruction->opcode = SUB;
-            parser->instruction->code |= SUB << 16;
             parser->instruction = NULL;
         } else if(strcmp(string, "pop") == 0) {
             parser->instruction->opcode = POP;
-            parser->instruction->code |= POP << 16;
             parser->instruction = NULL;
         } else if(strcmp(string, "cmp") == 0) {
             parser->instruction->opcode = CMP;
-            parser->instruction->code |= CMP << 16;
         } else if(strcmp(string, "jmp") == 0) {
             parser->instruction->opcode = JMP;
-            parser->instruction->code |= JMP << 16;
         } else if(strcmp(string, "jmp_eq") == 0 || strcmp(string, "jeq") == 0) {
             parser->instruction->opcode = JMP_EQ;
-            parser->instruction->code |= JMP_EQ << 16;
         } else if(strcmp(string, "jmp_neq") == 0 || strcmp(string, "jneq") == 0) {
             parser->instruction->opcode = JMP_NEQ;
-            parser->instruction->code |= JMP_NEQ << 16;
         } else if(strcmp(string, "jmp_abs") == 0 || strcmp(string, "jabs") == 0) {
             parser->instruction->opcode = JMP_ABS;
-            parser->instruction->code |= JMP_ABS << 16;
         } else if(strcmp(string, "call") == 0) {
             parser->instruction->opcode = CALL;
-            parser->instruction->code |= CALL << 16;
         } else if(strcmp(string, "ret") == 0) {
             parser->instruction->opcode = RET;
-            parser->instruction->code |= RET << 16;
         } else if(strcmp(string, "print") == 0)  {
             parser->instruction->opcode = PRINT;
-            parser->instruction->code |= PRINT << 16;
             parser->instruction = NULL;
         } else if(strcmp(string, "halt") == 0) {
             parser->instruction->opcode = HALT;
-            parser->instruction->code |= HALT << 16;
             parser->instruction = NULL;
         } else {
             RAISE_ERROR_F(
@@ -201,7 +186,6 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
             case STORE:
                 if(parser->instruction->immediate == _UNDEFINED) {
                     parser->instruction->immediate = atoi(string);
-                    parser->instruction->code |= (unsigned char) parser->instruction->immediate;
                     parser->instruction = NULL;
                 }
 
@@ -213,7 +197,6 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
                 if(parser->instruction->immediate == _UNDEFINED) {
                     memcpy(parser->instruction->string, string, size + 1);
                     parser->instruction->immediate = atoi(string);
-                    parser->instruction->code |= (unsigned char) parser->instruction->immediate;
                     parser->instruction = NULL;
                 }
 
@@ -223,10 +206,8 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
                 if(parser->instruction->immediate == _UNDEFINED) {
                     memcpy(parser->instruction->string, string, size + 1);
                     parser->instruction->immediate = atoi(string);
-                    parser->instruction->code |= (unsigned char) parser->instruction->immediate;
                 } else if(parser->instruction->arg1 == _UNDEFINED) {
                     parser->instruction->arg1 = atoi(string);
-                    parser->instruction->code |= parser->instruction->arg1 << 8;
                     parser->instruction = NULL;
                 }
 
@@ -239,7 +220,6 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
             case CMP:
                 if(parser->instruction->arg1 == _UNDEFINED) {
                     parser->instruction->arg1 = atoi(string);
-                    parser->instruction->code |= parser->instruction->arg1 << 8;
                     parser->instruction = NULL;
                 }
 
@@ -263,6 +243,29 @@ ERROR_CODE on_comment_end(struct mingus_parser_t *parser, char *pointer, size_t 
     FREE(string);
 
     /* raises no error */
+    RAISE_NO_ERROR;
+}
+
+ERROR_CODE build_code(struct instructionf_t *instruction) {
+    instruction->code = 0x00000000;
+    instruction->code |= (instruction->opcode & 0x0000ffff) << 16;
+
+    if(instruction->arg1 != _UNDEFINED) {
+        instruction->code |= (instruction->arg1 & 0x0000000f) << 8;
+    }
+
+    if(instruction->arg2 != _UNDEFINED) {
+        instruction->code |= (instruction->arg2 & 0x0000000f) << 4;
+    }
+
+    if(instruction->arg3 != _UNDEFINED) {
+        instruction->code |= instruction->arg3 & 0x0000000f;
+    }
+
+    if(instruction->immediate != _UNDEFINED) {
+        instruction->code |= instruction->immediate & 0x000000ff;
+    }
+
     RAISE_NO_ERROR;
 }
 
@@ -292,26 +295,10 @@ ERROR_CODE add_instruction(
     parser->instruction->immediate = immediate;
     parser->instruction->position = parser->instruction_count;
 
-    parser->instruction->code |= parser->instruction->opcode << 16;
-
-    if(arg1 != _UNDEFINED) {
-        parser->instruction->code |= parser->instruction->arg1 << 8;
-    }
-
-    if(arg2 != _UNDEFINED) {
-        parser->instruction->code |= parser->instruction->arg2 << 4;
-    }
-
-    if(arg3 != _UNDEFINED) {
-        parser->instruction->code |= parser->instruction->arg3;
-    }
-
-    if(immediate != _UNDEFINED) {
-        parser->instruction->code |= parser->instruction->immediate;
-    }
-
+    /* raises no error as no problem occured during execution */
     RAISE_NO_ERROR;
 }
+
 
 ERROR_CODE run(char *file_path, char *output_path) {
     /* allocates the value to be used to verify the
@@ -539,8 +526,8 @@ ERROR_CODE run(char *file_path, char *output_path) {
                 }
                 break;
 
-			case CALL:
-				get_value_string_hash_map(parser.labels, instruction->string, (void **) &address);
+            case CALL:
+                get_value_string_hash_map(parser.labels, instruction->string, (void **) &address);
                 if(address != (size_t) NULL) {
                     instruction->immediate = address;
                 }
@@ -565,6 +552,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
         /* sets the current instruction pointer in the
         parser for correct execution */
         instruction = &parser.instructions[index];
+        build_code(instruction);
         put_code(instruction->code, parser.output);
     }
 

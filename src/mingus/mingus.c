@@ -37,6 +37,7 @@ unsigned int mingus_fetch(struct state_t *state) {
 
 void mingus_decode(struct state_t *state, unsigned int instruction) {
     /* populates the (current) instruction with the decoded values */
+    state->instruction.code = instruction;
     state->instruction.opcode = (instruction & 0xffff0000) >> 16;
     state->instruction.arg1 = (instruction & 0x00000f00) >> 8;
     state->instruction.arg2 = (instruction & 0x000000f0) >> 4;

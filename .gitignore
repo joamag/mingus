@@ -2,7 +2,7 @@
 *.ncb
 *.user
 *.suo
-*.moc
+*.mic
 
 .DS_Store
 
