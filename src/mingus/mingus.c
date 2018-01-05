@@ -175,10 +175,10 @@ void mingus_eval(struct state_t *state) {
             assert(state->so > 1);
 
             /* retrieves both operands from the stack and then pops
-            both elements from it */
+            the second element from it */
             operand1 = state->stack[state->so - 2];
             operand2 = state->stack[state->so - 1];
-            state->so -= 2;
+            state->so -= 1;
 
             switch(instruction->arg1) {
                 case 1:
@@ -198,7 +198,7 @@ void mingus_eval(struct state_t *state) {
 
         /* in case it's the jmp operation */
         case JMP:
-            V_DEBUG_F("jmp %02x\n", instruction->immediate);
+            V_DEBUG_F("jmp %d\n", instruction->immediate);
 
             state->pc += instruction->immediate;
 
@@ -207,30 +207,40 @@ void mingus_eval(struct state_t *state) {
 
         /* in case it's the jmp eq operation */
         case JMP_EQ:
-            V_DEBUG_F("jmp_eq %02x #%08x\n", instruction->immediate, state->stack[state->so - 1]);
+            V_DEBUG_F("jmp_eq %d #%08x\n", instruction->immediate, state->stack[state->so - 1]);
 
             /* verifies the condition for the instruction
             execution without any problem */
             assert(state->so > 0);
 
+            /* compres the current stack top with zero (comparision
+            verified) and increments the program counter if that's the case */
             if(state->stack[state->so - 1] == 1) {
                 state->pc += instruction->immediate;
             }
+
+            /* pops the top element from the stack */
+            state->so--;
 
             /* breaks the switch */
             break;
 
         /* in case it's the jmp neq operation */
         case JMP_NEQ:
-            V_DEBUG_F("jmp_neq %02x #%08x\n", instruction->immediate, state->stack[state->so - 1]);
+            V_DEBUG_F("jmp_neq %d #%08x\n", instruction->immediate, state->stack[state->so - 1]);
 
             /* verifies the condition for the instruction
             execution without any problem */
             assert(state->so > 0);
 
+            /* compres the current stack top with zero (comparision
+            failed) and increments the program counter if that's the case */
             if(state->stack[state->so - 1] == 0) {
                 state->pc += instruction->immediate;
             }
+
+            /* pops the top element from the stack */
+            state->so--;
 
             /* breaks the switch */
             break;
