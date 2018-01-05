@@ -166,6 +166,12 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
         } else if(strcmp(string, "jmp_abs") == 0 || strcmp(string, "jabs") == 0) {
             parser->instruction->opcode = JMP_ABS;
             parser->instruction->code |= JMP_ABS << 16;
+        } else if(strcmp(string, "call") == 0) {
+            parser->instruction->opcode = CALL;
+            parser->instruction->code |= CALL << 16;
+        } else if(strcmp(string, "ret") == 0) {
+            parser->instruction->opcode = RET;
+            parser->instruction->code |= RET << 16;
         } else if(strcmp(string, "print") == 0)  {
             parser->instruction->opcode = PRINT;
             parser->instruction->code |= PRINT << 16;
@@ -208,6 +214,19 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
                     memcpy(parser->instruction->string, string, size + 1);
                     parser->instruction->immediate = atoi(string);
                     parser->instruction->code |= (unsigned char) parser->instruction->immediate;
+                    parser->instruction = NULL;
+                }
+
+                break;
+
+            case CALL:
+                if(parser->instruction->immediate == _UNDEFINED) {
+                    memcpy(parser->instruction->string, string, size + 1);
+                    parser->instruction->immediate = atoi(string);
+                    parser->instruction->code |= (unsigned char) parser->instruction->immediate;
+                } else if(parser->instruction->arg1 == _UNDEFINED) {
+                    parser->instruction->arg1 = atoi(string);
+                    parser->instruction->code |= parser->instruction->arg1 << 8;
                     parser->instruction = NULL;
                 }
 

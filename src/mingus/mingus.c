@@ -76,8 +76,7 @@ void mingus_eval(struct state_t *state) {
 
             /* loads the value located at the immediate location to the stack and
             increments the stack pointer by such value */
-            state->stack[state->so] = state->locals[instruction->immediate];
-            state->so++;
+            MINGUS_PUSH(state, state->locals[instruction->immediate]);
 
             /* breaks the switch */
             break;
@@ -88,8 +87,7 @@ void mingus_eval(struct state_t *state) {
 
             /* sets the integer in the top of stack and then
             increments the current stack pointer */
-            state->stack[state->so] = instruction->immediate;
-            state->so++;
+            MINGUS_PUSH(state, instruction->immediate);
 
             /* breaks the switch */
             break;
@@ -180,6 +178,8 @@ void mingus_eval(struct state_t *state) {
             operand2 = state->stack[state->so - 1];
             state->so -= 1;
 
+            /* switches over the kind of comparison that is going
+            to be performed */
             switch(instruction->arg1) {
                 case 1:
                     result = operand1 == operand2 ? 1 : 0;
@@ -241,6 +241,34 @@ void mingus_eval(struct state_t *state) {
 
             /* pops the top element from the stack */
             state->so--;
+
+            /* breaks the switch */
+            break;
+
+       /* in case it's the call instruction */
+        case CALL:
+            V_DEBUG_F("call #%08x\n", state->stack[state->so - 1]);
+
+            /* pushes the number of arguments, the function location
+            and the current program counter to the stack */
+            MINGUS_PUSH(state, instruction->arg1)
+            MINGUS_PUSH(state, instruction->immediate)
+            MINGUS_PUSH(state, state->pc)
+
+            /* updates the current program counter with the jump location
+            for the function */
+            state->pc = instruction->immediate;
+
+            /* breaks the switch */
+            break;
+
+       /* in case it's the ret instruction */
+        case RET:
+            V_DEBUG_F("ret\n");
+
+            state->pc = MINGUS_POP(state);
+            MINGUS_POP(state);
+            MINGUS_POP(state);
 
             /* breaks the switch */
             break;

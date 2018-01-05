@@ -44,6 +44,9 @@
  */
 #define MINGUS_CODE_VERSION 1
 
+#define MINGUS_PUSH(state, value) state->stack[state->so] = value; state->so++;
+#define MINGUS_POP(state) state->stack[state->so]; state->so--
+
 /**
  * Enumeration defining all the opcodes for
  * the various mingus operations.
@@ -62,6 +65,8 @@ typedef enum opcodes_e {
     JMP_EQ,
     JMP_NEQ,
     JMP_ABS,
+    CALL,
+    RET,
     PRINT
 } opcodes;
 
