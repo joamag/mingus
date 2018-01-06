@@ -1,4 +1,9 @@
+prefix = /usr/local
+
 all: mingus mingusa
+
+install: all
+	install mingus mingusa $(prefix)/bin
 
 clean:
 	rm -f mingus mingusa
