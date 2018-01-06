@@ -60,7 +60,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
 
     /* swtiches over the instruction number */
     switch(instruction->opcode) {
-        /* in case it's the halt instruction */
         case HALT:
             V_DEBUG("halt\n");
 
@@ -74,7 +73,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the load instruction */
         case LOAD:
             V_DEBUG_F("load #%08x (#%08x)\n", instruction->immediate, state->locals[instruction->immediate]);
 
@@ -85,7 +83,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the loadi instruction */
         case LOADI:
             V_DEBUG_F("loadi #%08x\n", instruction->immediate);
 
@@ -96,7 +93,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the store instruction */
         case STORE:
             V_DEBUG_F("store #%08x #%08x\n", instruction->immediate, MINGUS_PEEK(state));
 
@@ -110,7 +106,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the add instruction */
         case ADD:
             V_DEBUG_F("add #%08x #%08x\n", MINGUS_PEEK(state), MINGUS_PEEK_OFF(state, 1));
 
@@ -130,7 +125,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the sub instruction */
         case SUB:
             V_DEBUG_F("sub #%08x #%08x\n", MINGUS_PEEK(state), MINGUS_PEEK_OFF(state, 1));
 
@@ -150,7 +144,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the pop instruction */
         case POP:
             V_DEBUG_F("pop #%08x\n", MINGUS_PEEK(state));
 
@@ -164,7 +157,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the cmp operation */
         case CMP:
             V_DEBUG_F("cmp '%s' #%08x #%08x\n", operands[instruction->arg1], MINGUS_PEEK(state), MINGUS_PEEK_OFF(state, 1));
 
@@ -195,7 +187,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the jmp operation */
         case JMP:
             V_DEBUG_F("jmp %d\n", instruction->immediate);
 
@@ -206,7 +197,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the jmp eq operation */
         case JMP_EQ:
             V_DEBUG_F("jmp_eq %d #%08x\n", instruction->immediate, MINGUS_PEEK(state));
 
@@ -226,7 +216,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the jmp neq operation */
         case JMP_NEQ:
             V_DEBUG_F("jmp_neq %d #%08x\n", instruction->immediate, MINGUS_PEEK(state));
 
@@ -246,7 +235,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the jmp abs operation */
         case JMP_ABS:
             V_DEBUG_F("jmp_abs #%08x\n", instruction->immediate);
 
@@ -257,7 +245,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the call instruction */
         case CALL:
             V_DEBUG_F("call #%08x %d\n", instruction->immediate, instruction->arg1);
 
@@ -274,7 +261,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the ret instruction */
         case RET:
             V_DEBUG("ret\n");
 
@@ -285,7 +271,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the print instruction */
         case PRINT:
             V_DEBUG_F("print #%08x\n", MINGUS_PEEK(state));
 
@@ -300,7 +285,6 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             /* breaks the switch */
             break;
 
-        /* in case it's the prints instruction */
         case PRINTS:
             V_DEBUG_F("prints #%08x\n", MINGUS_PEEK(state));
 
