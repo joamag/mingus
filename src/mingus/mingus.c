@@ -59,7 +59,7 @@ void mingus_eval(struct state_t *state) {
     switch(instruction->opcode) {
         /* in case it's the halt instruction */
         case HALT:
-            V_DEBUG_F("halt\n");
+            V_DEBUG("halt\n");
 
             /* verifies the condition for the instruction
             execution without any problem */
@@ -273,7 +273,7 @@ void mingus_eval(struct state_t *state) {
 
         /* in case it's the ret instruction */
         case RET:
-            V_DEBUG_F("ret\n");
+            V_DEBUG("ret\n");
 
             state->pc = MINGUS_CALL_POP(state);
             MINGUS_CALL_POP(state);
