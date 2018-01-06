@@ -204,7 +204,8 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             execution without any problem */
             assert(state->so > 0);
 
-            /* pops the current stack result as the pop value */
+            /* pops the current stack top as the result value that is going
+            to be used for the equality validation */
             result = MINGUS_POP(state);
 
             /* compares the current stack top with zero (comparision
@@ -223,7 +224,8 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             execution without any problem */
             assert(state->so > 0);
 
-            /* pops the current stack result as the pop value */
+            /* pops the current stack top as the result value that is going
+            to be used for the inequality validation */
             result = MINGUS_POP(state);
 
             /* compares the current stack top with zero (comparision
