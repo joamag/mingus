@@ -5,7 +5,7 @@ A small and simple VM infra-structure.
 ## Usage
 
 ```bash
-mingua example.mia
+mingua example.mia example.mio
 mingus example.mio
 ```
 
