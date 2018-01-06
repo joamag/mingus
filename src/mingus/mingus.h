@@ -46,11 +46,13 @@
 
 #define MINGUS_PUSH(state, value) state->stack[state->so] = value; state->so++;
 #define MINGUS_POP(state) state->stack[state->so - 1]; state->so--
+#define MINGUS_POP_S(state) state->so--
 #define MINGUS_PEEK(state) state->stack[state->so - 1]
 #define MINGUS_PEEK_OFF(state, offset) state->stack[state->so - offset - 1]
 
 #define MINGUS_CALL_PUSH(state, value) state->call_stack[state->cso] = value; state->cso++;
 #define MINGUS_CALL_POP(state) state->call_stack[state->cso - 1]; state->cso--
+#define MINGUS_CALL_POP_S(state) state->cso--
 #define MINGUS_CALL_PEEK(state) state->call_stack[state->cso - 1]
 #define MINGUS_CALL_PEEK_OFF(state, offset) state->call_stack[state->cso - offset - 1]
 
@@ -204,16 +206,18 @@ unsigned int mingus_fetch(struct state_t *state);
  * @param state The current virtual machine state.
  * @param instruction The instruction to be decoded
  * into the global variables.
+ * @return The error code on the function execution.
  */
-void mingus_decode(struct state_t *state, unsigned int instruction);
+ERROR_CODE mingus_decode(struct state_t *state, unsigned int instruction);
 
 /**
  * Evaluates the latest decoded instruction, and
  * changes the current machine state accordingly.
  *
  * @param state The current virtual machine state.
+ * @return The error code on the function execution.
  */
-void mingus_eval(struct state_t *state);
+ERROR_CODE mingus_eval(struct state_t *state);
 
 /**
  * Shows the state of the stack for the provided

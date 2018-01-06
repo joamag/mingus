@@ -126,7 +126,7 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
     colon this token is considered to be a label */
     else if(string[size - 1] == ':') {
         string[size - 1] = '\0';
-        set_value_string_hash_map(parser->labels, string, (void *) parser->instruction_count);
+        set_value_string_hash_map(parser->labels, (unsigned char *) string, (void *) parser->instruction_count);
         V_DEBUG_F("label '%s' #%08x\n", string, parser->instruction_count);
     }
 
@@ -246,6 +246,9 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
                     parser->instruction = NULL;
                 }
 
+                break;
+
+            default:
                 break;
         }
     }
@@ -548,7 +551,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
             case JMP:
             case JMP_EQ:
             case JMP_NEQ:
-                get_value_string_hash_map(parser.labels, instruction->string, (void **) &address);
+                get_value_string_hash_map(parser.labels, (unsigned char *) instruction->string, (void **) &address);
                 if(address != (size_t) NULL) {
                     instruction->immediate = address - instruction->position;
                     instruction->code |= (unsigned char) instruction->immediate;
@@ -557,10 +560,13 @@ ERROR_CODE run(char *file_path, char *output_path) {
 
             case JMP_ABS:
             case CALL:
-                get_value_string_hash_map(parser.labels, instruction->string, (void **) &address);
+                get_value_string_hash_map(parser.labels, (unsigned char *) instruction->string, (void **) &address);
                 if(address != (size_t) NULL) {
                     instruction->immediate = address;
                 }
+                break;
+
+            default:
                 break;
         }
     }
@@ -588,7 +594,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
 
     /* prints a logging message indicating the results
     of the assembling, for debugging purposes */
-    PRINTF_F("Processed %d instructions...\n", parser.instruction_count);
+    PRINTF_F("Processed %d instructions...\n", (int) parser.instruction_count);
 
     /* releases the buffer, to avoid any memory leaking */
     FREE(buffer);

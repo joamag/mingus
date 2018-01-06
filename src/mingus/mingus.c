@@ -35,7 +35,7 @@ unsigned int mingus_fetch(struct state_t *state) {
     return state->program[state->pc++];
 }
 
-void mingus_decode(struct state_t *state, unsigned int instruction) {
+ERROR_CODE mingus_decode(struct state_t *state, unsigned int instruction) {
     /* populates the (current) instruction with the decoded values */
     state->instruction.code = instruction;
     state->instruction.opcode = (instruction & 0xffff0000) >> 16;
@@ -43,9 +43,12 @@ void mingus_decode(struct state_t *state, unsigned int instruction) {
     state->instruction.arg2 = (instruction & 0x000000f0) >> 4;
     state->instruction.arg3 = (instruction & 0x0000000f);
     state->instruction.immediate = (instruction & 0x000000ff);
+
+    /* returns the control flow with no error */
+    RAISE_NO_ERROR;
 }
 
-void mingus_eval(struct state_t *state) {
+ERROR_CODE mingus_eval(struct state_t *state) {
     /* retrieves the current instruction */
     struct instruction_t *instruction = &state->instruction;
 
@@ -156,7 +159,7 @@ void mingus_eval(struct state_t *state) {
             assert(state->so > 0);
 
             /* pops the top element from the stack */
-            MINGUS_POP(state);
+            MINGUS_POP_S(state);
 
             /* breaks the switch */
             break;
@@ -276,8 +279,8 @@ void mingus_eval(struct state_t *state) {
             V_DEBUG("ret\n");
 
             state->pc = MINGUS_CALL_POP(state);
-            MINGUS_CALL_POP(state);
-            MINGUS_CALL_POP(state);
+            MINGUS_CALL_POP_S(state);
+            MINGUS_CALL_POP_S(state);
 
             /* breaks the switch */
             break;
@@ -307,11 +310,22 @@ void mingus_eval(struct state_t *state) {
 
             /* retrieves the current top value from the stack and
             prints the string in such address to the standard output */
-            PRINTF_F("%s\n", &state->stack[state->so - 1]);
+            PRINTF_F("%s\n", (char *) &state->stack[state->so - 1]);
 
             /* breaks the switch */
             break;
+
+        default:
+            RAISE_ERROR_F(
+                RUNTIME_EXCEPTION_ERROR_CODE,
+                (unsigned char *) "Invalid opcode '%d'",
+                instruction->opcode
+            );
     }
+
+    /* raises no error as this is the final enpoint
+    for the instruction evaluation */
+    RAISE_NO_ERROR;
 }
 
 ERROR_CODE run(char *file_path) {
@@ -372,8 +386,10 @@ ERROR_CODE run(char *file_path) {
         /* fetches the next instruction, decodes it into
         the intruction and then evalutates the current state */
         instruction = mingus_fetch(&state);
-        mingus_decode(&state, instruction);
-        mingus_eval(&state);
+        return_value = mingus_decode(&state, instruction);
+        if(IS_ERROR_CODE(return_value)) { RAISE_AGAIN(return_value); }
+        return_value = mingus_eval(&state);
+        if(IS_ERROR_CODE(return_value)) { RAISE_AGAIN(return_value); }
     }
 
     /* normal returns of the function with no error */
