@@ -359,6 +359,15 @@ ERROR_CODE run(char *file_path, char *output_path) {
     to be used as the output of the bytecode */
     FILE *out;
 
+    /* in case the provided file path is not valid raises
+    and error indicating the problem */
+    if(file_path == NULL) {
+        RAISE_ERROR_M(
+            RUNTIME_EXCEPTION_ERROR_CODE,
+            (unsigned char *) "No input file"
+        );
+    }
+
     /* counts the number of bytes in the asm file
     and then opens the asm file to be assembled in
     binary mode (required for parsing) */
@@ -366,7 +375,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
     if(IS_ERROR_CODE(return_value)) {
         RAISE_ERROR_F(
             RUNTIME_EXCEPTION_ERROR_CODE,
-            (unsigned char *) "Problem couting file %s",
+            (unsigned char *) "Problem counting file %s",
             file_path
         );
     }

@@ -6,6 +6,9 @@
 
 .DS_Store
 
+/mingus
+/mingusa
+
 /bin
 /build
 /win32/vs2008ex/*/*

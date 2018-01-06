@@ -30,6 +30,5 @@
 #include "targetver.h"
 
 #include <stdio.h>
-#include <tchar.h>
 
 #include <viriatum/viriatum.h>
