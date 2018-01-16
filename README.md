@@ -16,6 +16,7 @@ A series of examples may be found [here](examples).
 ## References
 
 * [Inside The Python Virtual Machine](https://leanpub.com/insidethepythonvirtualmachine/read)
+* [Disassembler for Python bytecode](https://docs.python.org/2/library/dis.html)
 
 ## About
 
