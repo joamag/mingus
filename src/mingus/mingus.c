@@ -1,6 +1,6 @@
 /*
  Mingus Virtual Machine
- Copyright (c) 2008-2017 Hive Solutions Lda.
+ Copyright (c) 2008-2018 Hive Solutions Lda.
 
  This file is part of Mingus Virtual Machine.
 
@@ -21,7 +21,7 @@
  __version__   = 1.0.0
  __revision__  = $LastChangedRevision$
  __date__      = $LastChangedDate$
- __copyright__ = Copyright (c) 2008-2017 João Magalhães
+ __copyright__ = Copyright (c) 2008-2018 João Magalhães
  __license__   = Apache License, Version 2.0
 */
 
