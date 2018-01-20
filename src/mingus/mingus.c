@@ -266,6 +266,8 @@ ERROR_CODE mingus_eval(struct state_t *state) {
         case RET:
             V_DEBUG("ret\n");
 
+            /* pops the current call stack values, notice
+            that the first one is the old program counter */
             state->pc = MINGUS_CALL_POP(state);
             MINGUS_CALL_POP_S(state);
             MINGUS_CALL_POP_S(state);
