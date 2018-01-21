@@ -11,4 +11,5 @@
 
 /bin
 /build
+/mingus.dSYM
 /win32/vs2008ex/*/*
