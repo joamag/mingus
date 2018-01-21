@@ -4,4 +4,7 @@ language: c
 compiler:
   - clang
   - gcc
+install:
+  - git clone https://github.com/hivesolutions/viriatum.git
+  - cd viriatum && ./autogen.sh && ./configure && make && make install
 script: make all
