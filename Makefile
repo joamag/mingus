@@ -34,11 +34,11 @@ examples/call.mic: mingusa examples/call.mia
 
 examples.run: examples/loop.mic.run examples/calc.mic.run examples/call.mic.run
 
-examples/loop.mic.run: examples/loop.mic
+examples/loop.mic.run: mingus examples/loop.mic
 	./mingus examples/loop.mic
 
-examples/calc.mic.run: examples/calc.mic
+examples/calc.mic.run: mingus examples/calc.mic
 	./mingus examples/calc.mic
 
-examples/call.mic.run: examples/call.mic
+examples/call.mic.run: mingus examples/call.mic
 	./mingus examples/call.mic
