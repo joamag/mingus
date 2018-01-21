@@ -24,10 +24,10 @@ mingusa: src/mingus_assembler/mingus_assembler.c
 examples.build: examples/loop.mic examples/calc.mic examples/call.mic
 
 examples/loop.mic: mingusa examples/loop.mia
-	mingusa examples/loop.mia examples/loop.mic
+	./mingusa examples/loop.mia examples/loop.mic
 
 examples/calc.mic: mingusa examples/calc.mia
-	mingusa examples/calc.mia examples/calc.mic
+	./mingusa examples/calc.mia examples/calc.mic
 
 examples/call.mic: mingusa examples/call.mia
-	mingusa examples/call.mia examples/call.mic
+	./mingusa examples/call.mia examples/call.mic
