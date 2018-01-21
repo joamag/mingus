@@ -139,7 +139,7 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
     else if(string[size - 1] == ':') {
         string[size - 1] = '\0';
         set_value_string_hash_map(parser->labels, (unsigned char *) string, (void *) parser->instruction_count);
-        V_DEBUG_F("label '%s' #%08x\n", string, parser->instruction_count);
+        V_DEBUG_F("label '%s' #%08x\n", string, (unsigned int) parser->instruction_count);
     }
 
     /* otherwise it's considered to be an opcode reference

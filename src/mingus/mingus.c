@@ -406,7 +406,7 @@ void show_stack(struct state_t *state) {
     then debugs the stack information */
     pointer = &buffer[count];
     SPRINTF(pointer, 1024 - count, "%s", "\n");
-    V_DEBUG(buffer);
+    V_DEBUG_F("%s", buffer);
 }
 
 int main(int argc, const char *argv[]) {
