@@ -1,9 +1,9 @@
-cc = gcc
-rm = rm
-cflags = -Wall
-clibs = -lviriatum
-install = install
-prefix = /usr/local
+cc := cc
+rm := rm
+cflags := -Wall
+clibs := -lviriatum
+install := install
+prefix := /usr/local
 
 base: mingus mingusa
 
