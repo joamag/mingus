@@ -1,5 +1,7 @@
 cc = gcc
 rm = rm
+cflags = -Wall
+clibs = -lviriatum
 install = install
 prefix = /usr/local
 
@@ -12,7 +14,7 @@ clean:
 	$(rm) -f mingus mingusa
 
 mingus: src/mingus/mingus.c
-	$(cc) -lviriatum src/mingus/mingus.c -o mingus
+	$(cc) $(cflags) $(clibs) src/mingus/mingus.c -o mingus
 
 mingusa: src/mingus_assembler/mingus_assembler.c
-	$(cc) -lviriatum src/mingus_assembler/mingus_assembler.c -o mingusa
+	$(cc) $(cflags) $(clibs) src/mingus_assembler/mingus_assembler.c -o mingusa

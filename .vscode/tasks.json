@@ -3,9 +3,9 @@
     "tasks": [{
         "label": "(gcc) Build mingus",
         "type": "shell",
-        "command": "gcc",
+        "command": "make",
         "args": [
-            "-lviriatum", "-g", "src/mingus/mingus.c", "-o", "mingus"
+            "cflags=-g -Wall"
         ],
         "group": {
             "kind": "build",
