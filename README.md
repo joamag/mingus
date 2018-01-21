@@ -28,7 +28,7 @@ A series of examples may be found [here](examples).
 
 ### Lua
 
-* [https://www.lua.org/doc/jucs05.pdf](The Implementation of Lua 5.0)
+* [The Implementation of Lua 5.0](https://www.lua.org/doc/jucs05.pdf)
 
 ## About
 
