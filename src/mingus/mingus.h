@@ -177,10 +177,10 @@ typedef struct state_t {
     unsigned int call_stack[STACK_SIZE];
 
     /**
-     * The current set of local variables that can be
+     * The current set of global variables that can be
      * used in the virtual machine context.
      */
-    unsigned int locals[LOCALS_SIZE];
+    unsigned int globals[LOCALS_SIZE];
 
     /**
      * The current instruction to be executed in the

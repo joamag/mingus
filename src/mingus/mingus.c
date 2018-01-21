@@ -74,11 +74,11 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             break;
 
         case LOAD:
-            V_DEBUG_F("load #%08x (#%08x)\n", instruction->immediate, state->locals[(size_t) instruction->immediate]);
+            V_DEBUG_F("load #%08x (#%08x)\n", instruction->immediate, state->globals[(size_t) instruction->immediate]);
 
             /* loads the value located at the immediate location to the stack and
             increments the stack pointer by such value */
-            MINGUS_PUSH(state, state->locals[(size_t) instruction->immediate]);
+            MINGUS_PUSH(state, state->globals[(size_t) instruction->immediate]);
 
             /* breaks the switch */
             break;
@@ -101,7 +101,7 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             assert(state->so > 0);
 
             /* stores the top of the stack in the local storage */
-            state->locals[(size_t) instruction->immediate] = MINGUS_POP(state);
+            state->globals[(size_t) instruction->immediate] = MINGUS_POP(state);
 
             /* breaks the switch */
             break;
