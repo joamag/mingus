@@ -3,10 +3,7 @@
     "tasks": [{
         "label": "(make) Build all",
         "type": "shell",
-        "command": "make",
-        "args": [
-            "cflags=-g -Wall"
-        ],
+        "command": "make cflags=-g -Wall",
         "group": {
             "kind": "build",
             "isDefault": true
