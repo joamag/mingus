@@ -9,4 +9,4 @@ install:
   - pushd viriatum
   - ./autogen.sh && ./configure --prefix=/usr && make && sudo env "PATH=$PATH" make install
   - popd
-script: make all
+script: make all && make examples.run
