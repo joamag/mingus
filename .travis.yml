@@ -7,6 +7,6 @@ compiler:
 install:
   - git clone https://github.com/hivesolutions/viriatum.git
   - pushd viriatum
-  - ./autogen.sh && CFLAGS="-O2 -fPIC" ./configure --prefix=/usr && make && sudo make install
+  - ./autogen.sh && ./configure --prefix=/usr && make && sudo make install
   - popd
-script: make all cflags="-O2 -fPIC"
+script: make all
