@@ -7,6 +7,6 @@ compiler:
 install:
   - git clone https://github.com/hivesolutions/viriatum.git
   - pushd viriatum
-  - ./autogen.sh && ./configure --prefix=/usr && make && sudo PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin make install
+  - ./autogen.sh && ./configure --prefix=/usr && make && sudo env "PATH=$PATH" make install
   - popd
 script: make all
