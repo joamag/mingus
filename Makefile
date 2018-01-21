@@ -16,10 +16,10 @@ clean:
 	$(rm) -f mingus mingusa examples/*.mic
 
 mingus: src/mingus/mingus.c
-	$(cc) $(cflags) $(clibs) src/mingus/mingus.c -o mingus
+	$(cc) $(cflags) src/mingus/mingus.c -o mingus $(clibs)
 
 mingusa: src/mingus_assembler/mingus_assembler.c
-	$(cc) $(cflags) $(clibs) src/mingus_assembler/mingus_assembler.c -o mingusa
+	$(cc) $(cflags) src/mingus_assembler/mingus_assembler.c -o mingusa $(clibs)
 
 examples.build: examples/loop.mic examples/calc.mic examples/call.mic
 
