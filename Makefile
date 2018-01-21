@@ -4,6 +4,8 @@ cflags := -Wall
 clibs := -lviriatum
 install := install
 prefix := /usr/local
+debug := 0
+dflags := -D HAVE_DEBUG
 
 base: mingus mingusa
 
@@ -16,10 +18,18 @@ clean:
 	$(rm) -f mingus mingusa examples/*.mic
 
 mingus: src/mingus/mingus.c
+ifeq ($(debug),1)
+	$(cc) $(cflags) $(dflags) src/mingus/mingus.c -o mingus $(clibs)
+else
 	$(cc) $(cflags) src/mingus/mingus.c -o mingus $(clibs)
+endif
 
 mingusa: src/mingus_assembler/mingus_assembler.c
+ifeq ($(debug),1)
+	$(cc) $(cflags) $(dflags) src/mingus_assembler/mingus_assembler.c -o mingusa $(clibs)
+else
 	$(cc) $(cflags) src/mingus_assembler/mingus_assembler.c -o mingusa $(clibs)
+endif
 
 examples.build: examples/loop.mic examples/calc.mic examples/call.mic
 

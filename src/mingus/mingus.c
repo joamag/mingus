@@ -29,6 +29,9 @@
 
 #include "mingus.h"
 
+/* starts the memory structures */
+START_MEMORY;
+
 const char operands[3][32] = { "##", "==", "!=" };
 
 unsigned int mingus_fetch(struct state_t *state) {

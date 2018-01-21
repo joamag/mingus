@@ -33,6 +33,9 @@
  */
 #define _UNDEFINED -127
 
+/* starts the memory structures */
+START_MEMORY;
+
 /**
  * Enumeration defining all the possible
  * states for the mingus assembler parser.
