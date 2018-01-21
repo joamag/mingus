@@ -52,7 +52,16 @@ typedef enum mingus_sections_e {
     DATA
 } mingus_sections;
 
+/**
+ * Primary structure to be used in the parsing
+ * of the assembly input file, should contain all
+ * the required pointers to be able to parse it.
+ */
 typedef struct mingus_parser_t {
+    /**
+     * The pointer to the output file structure
+     * where the encoded bytecode is going to be set.
+     */
     FILE *output;
     enum mingus_states_e state;
     enum mingus_sections_e section;
