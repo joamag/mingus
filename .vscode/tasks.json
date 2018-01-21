@@ -1,0 +1,15 @@
+{
+    "version": "2.0.0",
+    "tasks": [{
+        "label": "(gcc) Build mingus",
+        "type": "shell",
+        "command": "gcc",
+        "args": [
+            "-lviriatum", "-g", "src/mingus/mingus.c", "-o", "mingus"
+        ],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        }
+    }]
+}
