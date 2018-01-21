@@ -21,9 +21,15 @@ mingus: src/mingus/mingus.c
 mingusa: src/mingus_assembler/mingus_assembler.c
 	$(cc) $(cflags) src/mingus_assembler/mingus_assembler.c -o mingusa $(clibs)
 
-examples.run: examples.build
+examples.run: examples/loop.mic.run examples/calc.mic.run examples/call.mic.run
+
+examples/loop.mic.run: examples/loop.mic
 	./mingus examples/loop.mic
+
+examples/calc.mic.run: examples/calc.mic
 	./mingus examples/calc.mic
+
+examples/call.mic.run: examples/call.mic
 	./mingus examples/call.mic
 
 examples.build: examples/loop.mic examples/calc.mic examples/call.mic
