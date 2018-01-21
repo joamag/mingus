@@ -331,10 +331,6 @@ ERROR_CODE run(char *file_path) {
     size_t size;
     unsigned char *buffer;
 
-    /* allocates space for the reference to the header
-    of the code object to be interpreted */
-    struct code_header_t *header;
-
     /* creates the virtual machine state, no program
     buffer is already set (defered loading) */
     struct state_t state = { 1, 0, 0, 0, NULL };
@@ -361,7 +357,6 @@ ERROR_CODE run(char *file_path) {
 
     /* sets the program buffer in the state, effectively initializing
     the virtual machine */
-    header = (struct code_header_t *) buffer;
     state.program = (unsigned int *) (buffer + sizeof(struct code_header_t));
     state.running = TRUE;
 
