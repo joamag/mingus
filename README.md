@@ -15,11 +15,20 @@ A series of examples may be found [here](examples).
 
 ## References
 
+### General
+
+* [Simple Virtual Machine](http://bartoszsypytkowski.com/simple-virtual-machine)
+
+### Python
+
 * [Inside The Python Virtual Machine](https://leanpub.com/insidethepythonvirtualmachine/read)
 * [Disassembler for Python bytecode](https://docs.python.org/2/library/dis.html)
 * [Python Bytecode: Fun With Dis](http://akaptur.com/blog/2013/08/14/python-bytecode-fun-with-dis)
 * [Python VM Internals Tutorial’s documentation](http://cs263-technology-tutorial.readthedocs.io/en/latest)
-* [Simple Virtual Machine](http://bartoszsypytkowski.com/simple-virtual-machine)
+
+### Lua
+
+* [https://www.lua.org/doc/jucs05.pdf](The Implementation of Lua 5.0)
 
 ## About
 
