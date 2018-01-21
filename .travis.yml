@@ -1,0 +1,7 @@
+sudo: false
+dist: trusty
+language: c
+compiler:
+  - clang
+  - gcc
+script: make all
