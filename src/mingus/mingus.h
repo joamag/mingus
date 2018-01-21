@@ -136,7 +136,7 @@ typedef struct state_t {
      * Flag controlling if the virtual machine
      * is running.
      */
-    unsigned int running;
+    unsigned char running;
 
     /**
      * The program counter pointer that points
@@ -167,20 +167,20 @@ typedef struct state_t {
      * this structur contains the various values on
      * which the virtual machine can operate.
      */
-    int stack[STACK_SIZE];
+    unsigned int stack[STACK_SIZE];
 
     /**
      * The special purpose stack to be used only for calling
      * purposes. Should store things like funciotn address
      * original program counter and number of arguments.
      */
-    int call_stack[STACK_SIZE];
+    unsigned int call_stack[STACK_SIZE];
 
     /**
      * The current set of local variables that can be
      * used in the virtual machine context.
      */
-    int locals[LOCALS_SIZE];
+    unsigned int locals[LOCALS_SIZE];
 
     /**
      * The current instruction to be executed in the
