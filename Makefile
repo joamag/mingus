@@ -5,16 +5,26 @@ clibs = -lviriatum
 install = install
 prefix = /usr/local
 
-all: mingus mingusa
+base: mingus mingusa
+
+all: base examples.build
 
 install: all
 	$(install) mingus mingusa $(prefix)/bin
 
 clean:
-	$(rm) -f mingus mingusa
+	$(rm) -f mingus mingusa examples/*.mic
 
 mingus: src/mingus/mingus.c
 	$(cc) $(cflags) $(clibs) src/mingus/mingus.c -o mingus
 
 mingusa: src/mingus_assembler/mingus_assembler.c
 	$(cc) $(cflags) $(clibs) src/mingus_assembler/mingus_assembler.c -o mingusa
+
+examples.build: examples/calc.mic examples/call.mic
+
+examples/calc.mic: mingusa examples/calc.mia
+	mingusa examples/calc.mia examples/calc.mic
+
+examples/call.mic: mingusa examples/call.mia
+	mingusa examples/call.mia examples/call.mic
