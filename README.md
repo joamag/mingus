@@ -29,6 +29,7 @@ A series of examples may be found [here](examples).
 ### Lua
 
 * [The Implementation of Lua 5.0](https://www.lua.org/doc/jucs05.pdf)
+* [Lua 5.2 Bytecode and Virtual Machine](http://files.catwell.info/misc/mirror/lua-5.2-bytecode-vm-dirk-laurie/lua52vm.html)
 
 ## About
 
