@@ -1,5 +1,5 @@
 // Mingus Virtual Machine
-// Copyright (c) 2008-2018 Hive Solutions Lda.
+// Copyright (c) 2008-2019 Hive Solutions Lda.
 //
 // This file is part of Mingus Virtual Machine.
 //
