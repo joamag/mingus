@@ -2,7 +2,7 @@ name: Main Workflow
 on: [push]
 jobs:
   build-gcc:
-    name: Build GCC
+    name: Build
     strategy:
       matrix:
         gcc-version: [5, 6, 7, 8, 9]
@@ -13,9 +13,8 @@ jobs:
       - name: Install Viriatum
         run: |
           git clone https://github.com/hivesolutions/viriatum.git
-          pushd viriatum
+          cd viriatum
           ./autogen.sh && ./configure --prefix=/usr && make && sudo env "PATH=$PATH" make install
-          popd
       - name: Build Mingus
         run: |
           make all
