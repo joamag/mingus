@@ -33,5 +33,5 @@ A series of examples may be found [here](examples).
 
 ## About
 
-[![Build Status](https://travis-ci.org/joamag/mingus.svg?branch=master)](https://travis-ci.org/joamag/mingus)
+[![Build Status](https://github.com/joamag/mingus/workflows/Main%20Workflow/badge.svg)](https://github.com/joamag/mingus/actions)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/)
