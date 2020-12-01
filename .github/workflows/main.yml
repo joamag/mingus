@@ -14,7 +14,10 @@ jobs:
         run: |
           git clone https://github.com/hivesolutions/viriatum.git
           cd viriatum
-          ./autogen.sh && ./configure --prefix=/usr && make && env "PATH=$PATH" make install
+          ./autogen.sh
+          ./configure --prefix=/usr
+          make
+          make install
       - name: Build Mingus
         run: |
           make all
