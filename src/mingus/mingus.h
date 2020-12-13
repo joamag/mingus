@@ -164,14 +164,14 @@ typedef struct state_t {
 
     /**
      * The current data stack of the virtual machine,
-     * this structur contains the various values on
+     * this structure contains the various values on
      * which the virtual machine can operate.
      */
     unsigned int stack[STACK_SIZE];
 
     /**
      * The special purpose stack to be used only for calling
-     * purposes. Should store things like funciotn address
+     * purposes. Should store things like function address
      * original program counter and number of arguments.
      */
     unsigned int call_stack[STACK_SIZE];
