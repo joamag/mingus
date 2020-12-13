@@ -2,6 +2,8 @@
 
 A small and simple VM infra-structure.
 
+The Mingus VM is a stack based 32 bit VM that runs simple integer based operations. Its creation has been done for pure academic and learning purposes and should not be used for any practical reason.
+
 ## Usage
 
 ```bash
