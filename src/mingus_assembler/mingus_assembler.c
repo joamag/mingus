@@ -150,7 +150,7 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
         parser->instruction = &parser->instructions[parser->instruction_count];
 
         /* increments the number of instruction processed
-        (this is the instruction counteter) */
+        (this is the instruction counter) */
         parser->instruction_count++;
 
         /* initializes the new instruction that has been created
@@ -320,7 +320,7 @@ ERROR_CODE add_instruction(
     parser->instruction = &parser->instructions[parser->instruction_count];
 
     /* increments the number of instruction processed
-    (this is the instruction counteter) */
+    (this is the instruction counter) */
     parser->instruction_count++;
 
     /* initializes the parser's instruction code with
@@ -333,14 +333,14 @@ ERROR_CODE add_instruction(
     parser->instruction->immediate = immediate;
     parser->instruction->position = parser->instruction_count;
 
-    /* raises no error as no problem occured during execution */
+    /* raises no error as no problem occurred during execution */
     RAISE_NO_ERROR;
 }
 
 
 ERROR_CODE run(char *file_path, char *output_path) {
     /* allocates the value to be used to verify the
-    exitence of error from the function */
+    existence of error from the function */
     ERROR_CODE return_value;
 
     /* allocates space for the byte to be used
@@ -419,7 +419,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
     }
 
     /* allocates the required size to read the complete file
-    and then reads it completly */
+    and then reads it completely */
     buffer = (char *) MALLOC(file_size);
     fread(buffer, 1, file_size, file);
 
@@ -460,7 +460,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
         }
 
         /* retrieves the proper byte value taking into account if this is
-        the final ieteration or not */
+        the final interation or not */
         if(is_final == TRUE) {
             byte = '\0';
         } else {
@@ -492,7 +492,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
                         token to be used in the parsing loop */
                         parser.state = TOKEN;
 
-                        /* maks the beggining of the token
+                        /* marks the beggining of the token
                         to be used latter in the callback */
                         MINGUS_MARK(token_end);
 
@@ -590,7 +590,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
     code.header.data_size = 0;
     code.header.code_size = parser.instruction_count * sizeof(int);
 
-    /* retrieves the reference to the header structure and ouputs it
+    /* retrieves the reference to the header structure and outputs it
     directly to the parser output buffer */
     put_buffer((char *) &code.header, sizeof(struct code_header_t), parser.output);
 
@@ -622,7 +622,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
 
 int main(int argc, const char *argv[]) {
     /* allocates the value to be used to verify the
-    exitence of error from the function */
+    existence of error from the function */
     ERROR_CODE return_value;
 
     /* allocates and starts the pointer to the path
@@ -635,7 +635,7 @@ int main(int argc, const char *argv[]) {
     if(argc > 2) { output_path = (char *) argv[2]; }
 
     /* runs the virtual machine and verifies if an error
-    as occured, if that's the case prints it */
+    as occurred, if that's the case prints it */
     return_value = run(file_path, output_path);
     if(IS_ERROR_CODE(return_value)) {
         V_ERROR_F("Fatal error (%s)\n", (char *) GET_ERROR());
