@@ -80,6 +80,14 @@ typedef enum opcodes_e {
     PRINTS
 } opcodes;
 
+typedef enum data_types_e {
+    UNSET_T = 1,
+    BYTE_T,
+    WORD_T,
+    DWORD_T,
+    QWORD_T
+} data_types;
+
 typedef struct code_header_t {
     char magic[4];
     unsigned int version;
@@ -125,6 +133,21 @@ typedef struct instructionf_t {
     char string[128];
     unsigned int position;
 } instructionf;
+
+/**
+ * Structure describing a data element (for
+ * assembling) inside mingus virtual machine.
+ *
+ * This version of the data element structure should
+ * not be used for runtime environments to avoid
+ * spending unnecessary memory.
+ */
+typedef struct data_elementf_t {
+    enum data_types_e type;
+    unsigned int size;
+    char name[128];
+    char value[128];
+} data_elementf;
 
 /**
  * Structure describing a state of the Mingus

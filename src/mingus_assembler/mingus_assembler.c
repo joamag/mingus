@@ -43,7 +43,8 @@ START_MEMORY;
 typedef enum mingus_states_e {
     NORMAL = 1,
     TOKEN,
-    COMMENT
+    COMMENT,
+    STRING
 } mingus_states;
 
 /**
@@ -67,30 +68,48 @@ typedef struct mingus_parser_t {
      */
     FILE *output;
 
-	/**
-	 * The current state of the parser that controls
-	 * what's currently being parsed (eg: token, comment).
-	 */
+    /**
+     * The current state of the parser that controls
+     * what's currently being parsed (eg: token, comment).
+     */
     enum mingus_states_e state;
 
-	/**
-	 * The kind of section that is currently being parsed
-	 * (eg: text, data).
-	 */
+    /**
+     * The kind of section that is currently being parsed
+     * (eg: text, data).
+     */
     enum mingus_sections_e section;
 
-	/**
-	 * The counter that "counts" the number of instructions
-	 * that have been parsed.
-	 */
+    /**
+     * The counter that "counts" the number of instructions
+     * that have been parsed up until a certain point, this
+     * value can be used to calculate the instruction offset.
+     */
     size_t instruction_count;
 
-	/**
-	 * Pointer to the current intruction being parsed, so that
-	 * it can be completed with the proper operands.
-	 */
+    /**
+     * Pointer to the current intruction being parsed, so that
+     * it can be completed with the proper operands.
+     */
     struct instructionf_t *instruction;
+
+    /**
+     * Array that contains the complete set of instructions for
+     * the program, the static based allocation of memory poses
+     * a limitation on the assembled number of instructions.
+     */
     struct instructionf_t instructions[1024];
+
+    size_t data_element_count;
+
+    struct data_elementf_t *data_element;
+
+    struct data_elementf_t data_elements[64];
+
+    /**
+     * The hash map that maps the label name (as a string) to the
+     * instruction offset (memory offset).
+     */
     struct hash_map_t *labels;
 } mingus_parser;
 
@@ -154,6 +173,35 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
         }
     }
 
+    else if(parser->section == DATA) {
+        /* in case the token ends with a colon then this is a
+        new data allocation */
+        if(string[size - 1] == ':') {
+            parser->data_element = &parser->data_elements[parser->data_element_count];
+
+            /* increments the number of data elements meaning
+            that a new data element has been found */
+            parser->data_element_count++;
+
+            parser->data_element->type = UNSET_T;
+            parser->data_element->size = 0;
+
+            memcpy(parser->data_element->name, string, size - 1);
+            parser->data_element->name[size - 1] = '\0';
+        }
+        else if(parser->data_element->type == UNSET_T) {
+            if(strcmp(string, "db") == 0) {
+                parser->data_element->type = BYTE_T;
+            } else if(strcmp(string, "dw") == 0) {
+                parser->data_element->type = WORD_T;
+            } else if(strcmp(string, "dd") == 0) {
+                parser->data_element->type = DWORD_T;
+            } else if(strcmp(string, "dq") == 0) {
+                parser->data_element->type = QWORD_T;
+            }
+        }
+    }
+
     /* otherwise in case the last character in the string is a
     colon this token is considered to be a label */
     else if(string[size - 1] == ':') {
@@ -169,7 +217,7 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
         parser for correct execution */
         parser->instruction = &parser->instructions[parser->instruction_count];
 
-        /* increments the number of instruction processed
+        /* increments the number of instructions processed
         (this is the instruction counter) */
         parser->instruction_count++;
 
@@ -304,6 +352,23 @@ ERROR_CODE on_comment_end(struct mingus_parser_t *parser, char *pointer, size_t 
     RAISE_NO_ERROR;
 }
 
+ERROR_CODE on_string_end(struct mingus_parser_t *parser, char *pointer, size_t size) {
+    char *string = MALLOC(size + 1);
+    memcpy(string, pointer + 1, size - 1);
+    string[size - 1] = '\0';
+
+    if(parser->section == DATA && parser->data_element) {
+        parser->data_element->size = size - 1;
+        memcpy(parser->data_element->value, string, size - 1);
+        parser->data_element = NULL;
+    }
+
+    FREE(string);
+
+    /* raises no error */
+    RAISE_NO_ERROR;
+}
+
 ERROR_CODE build_code(struct instructionf_t *instruction) {
     instruction->code = 0x00000000;
     instruction->code |= (instruction->opcode & 0x0000ffff) << 16;
@@ -376,6 +441,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
     char *pointer;
     char *token_end_mark;
     char *comment_end_mark;
+    char *string_end_mark;
 
     size_t address;
     struct instructionf_t *instruction;
@@ -450,10 +516,12 @@ ERROR_CODE run(char *file_path, char *output_path) {
     /* updates the parser structure setting the appropriate
     output file (buffer) and the initial opcode value */
     parser.state = NORMAL;
-	parser.section = TEXT;
+    parser.section = TEXT;
     parser.output = out;
     parser.instruction = NULL;
     parser.instruction_count = 0;
+    parser.data_element = NULL;
+    parser.data_element_count = 0;
 
     /* creates the hash map to hold the various labels */
     create_hash_map(&parser.labels, 0);
@@ -497,6 +565,14 @@ ERROR_CODE run(char *file_path, char *output_path) {
                         parser.state = COMMENT;
 
                         MINGUS_MARK(comment_end);
+
+                        /* breaks the switch */
+                        break;
+
+                    case '"':
+                        parser.state = STRING;
+
+                        MINGUS_MARK(string_end);
 
                         /* breaks the switch */
                         break;
@@ -553,6 +629,24 @@ ERROR_CODE run(char *file_path, char *output_path) {
                         parser.state = NORMAL;
 
                         MINGUS_CALLBACK_DATA(comment_end);
+
+                        /* breaks the switch */
+                        break;
+
+                    default:
+                        /* breaks the switch */
+                        break;
+                }
+
+                /* breaks the switch */
+                break;
+
+            case STRING:
+                switch(byte) {
+                    case '"':
+                        parser.state = NORMAL;
+
+                        MINGUS_CALLBACK_DATA(string_end);
 
                         /* breaks the switch */
                         break;
