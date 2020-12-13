@@ -66,9 +66,29 @@ typedef struct mingus_parser_t {
      * where the encoded bytecode is going to be set.
      */
     FILE *output;
+
+	/**
+	 * The current state of the parser that controls
+	 * what's currently being parsed (eg: token, comment).
+	 */
     enum mingus_states_e state;
+
+	/**
+	 * The kind of section that is currently being parsed
+	 * (eg: text, data).
+	 */
     enum mingus_sections_e section;
+
+	/**
+	 * The counter that "counts" the number of instructions
+	 * that have been parsed.
+	 */
     size_t instruction_count;
+
+	/**
+	 * Pointer to the current intruction being parsed, so that
+	 * it can be completed with the proper operands.
+	 */
     struct instructionf_t *instruction;
     struct instructionf_t instructions[1024];
     struct hash_map_t *labels;
@@ -430,6 +450,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
     /* updates the parser structure setting the appropriate
     output file (buffer) and the initial opcode value */
     parser.state = NORMAL;
+	parser.section = TEXT;
     parser.output = out;
     parser.instruction = NULL;
     parser.instruction_count = 0;
