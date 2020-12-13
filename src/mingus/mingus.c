@@ -61,7 +61,7 @@ ERROR_CODE mingus_eval(struct state_t *state) {
     int operand2;
     int result;
 
-    /* swtiches over the instruction number */
+    /* switches over the instruction number */
     switch(instruction->opcode) {
         case HALT:
             V_DEBUG("halt\n");
@@ -161,7 +161,12 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             break;
 
         case CMP:
-            V_DEBUG_F("cmp '%s' #%08x #%08x\n", operands[(size_t) instruction->arg1], MINGUS_PEEK(state), MINGUS_PEEK_OFF(state, 1));
+            V_DEBUG_F(
+                "cmp '%s' #%08x #%08x\n",
+                operands[(size_t) instruction->arg1],
+                MINGUS_PEEK(state),
+                MINGUS_PEEK_OFF(state, 1)
+            );
 
             /* verifies the condition for the instruction
             execution without any problem */
@@ -193,7 +198,7 @@ ERROR_CODE mingus_eval(struct state_t *state) {
         case JMP:
             V_DEBUG_F("jmp %d\n", instruction->immediate);
 
-            /* incrments the program counter with the immediate
+            /* increments the program counter with the immediate
             value of this (relative) jump operation */
             state->pc += instruction->immediate;
 
@@ -314,28 +319,28 @@ ERROR_CODE mingus_eval(struct state_t *state) {
             );
     }
 
-    /* raises no error as this is the final enpoint
+    /* raises no error as this is the final endpoint
     for the instruction evaluation */
     RAISE_NO_ERROR;
 }
 
 ERROR_CODE run(char *file_path) {
     /* allocates the value to be used to verify the
-    exitence of error from the function */
+    existence of error from the function */
     ERROR_CODE return_value;
 
     /* allocates the space for the instruction
     value (its a "normal" integer value, 32 bit)*/
     int instruction;
 
-    /* allocates sapce for the variable that will
+    /* allocates space for the variable that will
     hold the size of the bytecode buffer and for
     the buffer that will hold the bytecode */
     size_t size;
     unsigned char *buffer;
 
     /* creates the virtual machine state, no program
-    buffer is already set (defered loading) */
+    buffer is already set (deferred loading) */
     struct state_t state = { 1, 0, 0, 0, NULL };
 
     /* in case the provided file path is not valid raises
@@ -370,7 +375,7 @@ ERROR_CODE run(char *file_path) {
         show_stack(&state);
 
         /* fetches the next instruction, decodes it into
-        the intruction and then evalutates the current state */
+        the intruction and then evaluates the current state */
         instruction = mingus_fetch(&state);
         return_value = mingus_decode(&state, instruction);
         if(IS_ERROR_CODE(return_value)) { RAISE_AGAIN(return_value); }
@@ -411,7 +416,7 @@ void show_stack(struct state_t *state) {
 
 int main(int argc, const char *argv[]) {
     /* allocates the value to be used to verify the
-    exitence of error from the function */
+    existence of error from the function */
     ERROR_CODE return_value;
 
     /* allocates and starts the pointer to the path
@@ -422,7 +427,7 @@ int main(int argc, const char *argv[]) {
     if(argc > 1) { file_path = (char *) argv[1]; }
 
     /* runs the virtual machine and verifies if an error
-    as occured, if that's the case prints it */
+    as occurred, if that's the case prints it */
     return_value = run(file_path);
     if(IS_ERROR_CODE(return_value)) {
         V_ERROR_F("Fatal error (%s)\n", (char *) GET_ERROR());
