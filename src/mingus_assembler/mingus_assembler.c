@@ -265,6 +265,9 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
         } else if(strcmp(string, "print") == 0)  {
             parser->instruction->opcode = PRINT;
             parser->instruction = NULL;
+        } else if(strcmp(string, "prints") == 0)  {
+            parser->instruction->opcode = PRINTS;
+            parser->instruction = NULL;
         } else if(strcmp(string, "halt") == 0) {
             parser->instruction->opcode = HALT;
             parser->instruction = NULL;
@@ -702,7 +705,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
     then sets a series of default values on the global header */
     memcpy(code.header.magic, "MING", 4);
     code.header.version = MINGUS_CODE_VERSION;
-    code.header.data_size = 0;
+	code.header.data_size = parser.data_element_count;
     code.header.code_size = parser.instruction_count * sizeof(int);
 
     /* retrieves the reference to the header structure and outputs it
