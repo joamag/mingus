@@ -19,8 +19,8 @@ jobs:
           make
           make install
       - name: Build Mingus
-        run: |
-          make all
-      - name: Build & Run Examples
-        run: |
-          make examples.run
+        run: make base
+      - name: Build Examples
+        run: make examples.build
+      - name: Run Examples
+        run: make examples.run
