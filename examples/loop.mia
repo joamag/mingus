@@ -4,22 +4,21 @@ loadi 10
 ; sets the starting point of the loop
 ; as this position
 start:
+    ; compares the current value with zero and if
+    ; that's the case jumps to the end
+    loadi 0
+    cmp 1
+    jeq end
 
-; compares the current value with zero and if
-; that's the case jumps to the end
-loadi 0
-cmp 1
-jeq end
+    ; subtracts one value from the current value
+    ; and prints the value
+    loadi 1
+    sub
+    print
 
-; subtracts one value from the current value
-; and prints the value
-loadi 1
-sub
-print
-
-; jumps to the current loop
-jmp start
+    ; jumps to the current loop
+    jmp start
 
 ; the final part of the execution
 end:
-pop
+    pop

@@ -1,16 +1,17 @@
 ; loads two values into the stack and then calls
 ; the simple sum function to add them together plus one
-loadi 10
-loadi 20
-call simple_sum 2
-print
-pop
-halt
+start:
+    loadi 10
+    loadi 20
+    call simple_sum 2
+    print
+    pop
+    halt
 
 ; creates a simple function that takes two
 ; arguments and sums them together and adds one
 simple_sum:
-add
-loadi 1
-add
-ret
+    add
+    loadi 1
+    add
+    ret
