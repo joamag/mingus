@@ -21,4 +21,6 @@ jobs:
       - name: Build Mingus
         run: |
           make all
+      - name: Build & Run Examples
+        run: |
           make examples.run

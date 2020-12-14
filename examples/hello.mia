@@ -2,6 +2,7 @@
     hello: db "Hello world!"
 
 .text
+start:
     load hello
     prints
     pop
