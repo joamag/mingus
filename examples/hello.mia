@@ -1,5 +1,5 @@
 .data
-    hello: "Hello world!"
+    hello: db "Hello world!"
 
 .text
     load hello
