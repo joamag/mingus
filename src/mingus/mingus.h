@@ -91,6 +91,8 @@ typedef enum data_types_e {
 typedef struct code_header_t {
     char magic[4];
     unsigned int version;
+    unsigned int data_count;
+    unsigned int code_count;
     unsigned int data_size;
     unsigned int code_size;
 } code_header;
@@ -145,6 +147,7 @@ typedef struct instructionf_t {
 typedef struct data_elementf_t {
     enum data_types_e type;
     unsigned int size;
+    char offset;
     char name[128];
     char value[128];
 } data_elementf;
@@ -210,6 +213,12 @@ typedef struct state_t {
      * current virtual machine context (state).
      */
     struct instruction_t instruction;
+
+    /**
+     * The header resulting from the parsing of the
+     * object file currently in read.
+     */
+    struct code_header_t header;
 } state;
 
 /**

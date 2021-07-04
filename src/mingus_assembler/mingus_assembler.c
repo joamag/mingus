@@ -100,10 +100,22 @@ typedef struct mingus_parser_t {
      */
     struct instructionf_t instructions[1024];
 
+    /**
+     * Integer variable that control the number of data elements
+     * that have bean found and stored in the data elements structure
+     */
     size_t data_element_count;
 
+    /**
+     * The reference to the current data element in parsing so that its
+     * attributes can be directly manipulated.
+     */
     struct data_elementf_t *data_element;
 
+    /**
+     * The complete set of data elements available parsed, to be used
+     * latter in the output of the file.
+     */
     struct data_elementf_t data_elements[64];
 
     /**
@@ -111,6 +123,8 @@ typedef struct mingus_parser_t {
      * instruction offset (memory offset).
      */
     struct hash_map_t *labels;
+
+    struct has_map_t *elements;
 } mingus_parser;
 
 #define MINGUS_MARK(FOR) MINGUS_MARK_N(FOR, 0)
@@ -179,15 +193,18 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
         if(string[size - 1] == ':') {
             parser->data_element = &parser->data_elements[parser->data_element_count];
 
-            /* increments the number of data elements meaning
-            that a new data element has been found */
-            parser->data_element_count++;
-
+            parser->data_element->offset = parser->data_element_count;
             parser->data_element->type = UNSET_T;
             parser->data_element->size = 0;
 
             memcpy(parser->data_element->name, string, size - 1);
             parser->data_element->name[size - 1] = '\0';
+
+            set_value_string_hash_map(parser->elements, (unsigned char *) parser->data_element->name, parser->data_element);
+
+            /* increments the number of data elements meaning
+            that a new data element has been found */
+            parser->data_element_count++;
         }
         else if(parser->data_element->type == UNSET_T) {
             if(strcmp(string, "db") == 0) {
@@ -288,6 +305,14 @@ ERROR_CODE on_token_end(struct mingus_parser_t *parser, char *pointer, size_t si
                 break;
 
             case LOAD:
+                if(parser->instruction->immediate == _UNDEFINED) {
+                    get_value_string_hash_map(parser->elements, (unsigned char *) string, (void **) &parser->data_element);
+                    parser->instruction->immediate = parser->data_element->offset;
+                    parser->instruction = NULL;
+                }
+
+                break;
+
             case LOADI:
             case STORE:
                 if(parser->instruction->immediate == _UNDEFINED) {
@@ -425,7 +450,6 @@ ERROR_CODE add_instruction(
     RAISE_NO_ERROR;
 }
 
-
 ERROR_CODE run(char *file_path, char *output_path) {
     /* allocates the value to be used to verify the
     existence of error from the function */
@@ -528,6 +552,8 @@ ERROR_CODE run(char *file_path, char *output_path) {
 
     /* creates the hash map to hold the various labels */
     create_hash_map(&parser.labels, 0);
+
+    create_hash_map(&parser.elements, 0);
 
     /* unsets the is final variable as the first cycle is
     never the final one */
@@ -674,7 +700,8 @@ ERROR_CODE run(char *file_path, char *output_path) {
     add_instruction(&parser, HALT, _UNDEFINED, _UNDEFINED, _UNDEFINED, _UNDEFINED);
 
     /* iterates over the complete set of instructions to run a series
-    of post-processing operations on all of them */
+    of post-processing operations on all of them, this is especially
+    important for the JMP and CALL related operations */
     for(index = 0; index < parser.instruction_count; index++) {
         instruction = &parser.instructions[index];
         switch(instruction->opcode) {
@@ -705,12 +732,24 @@ ERROR_CODE run(char *file_path, char *output_path) {
     then sets a series of default values on the global header */
     memcpy(code.header.magic, "MING", 4);
     code.header.version = MINGUS_CODE_VERSION;
-    code.header.data_size = parser.data_element_count;
+    code.header.data_count = parser.data_element_count;
+    code.header.code_count = parser.instruction_count;
+    code.header.data_size = parser.data_element_count * sizeof(struct data_elementf_t);
     code.header.code_size = parser.instruction_count * sizeof(int);
 
     /* retrieves the reference to the header structure and outputs it
     directly to the parser output buffer */
     put_buffer((char *) &code.header, sizeof(struct code_header_t), parser.output);
+
+    /* iterates over the complete set of data elements to output their
+    respective elements to the output buffer */
+    for(index = 0; index < parser.data_element_count; index++) {
+        put_buffer(
+            (char *) &parser.data_elements[index],
+            sizeof(struct data_elementf_t),
+            parser.output
+        );
+    }
 
     /* iterates over the complete set of instructions to ouput the code
     of it into the output buffer (directly from structure) */
@@ -724,6 +763,7 @@ ERROR_CODE run(char *file_path, char *output_path) {
 
     /* prints a logging message indicating the results
     of the assembling, for debugging purposes */
+    PRINTF_F("Processed %d data elements...\n", (int) parser.data_element_count);
     PRINTF_F("Processed %d instructions...\n", (int) parser.instruction_count);
 
     /* releases the buffer, to avoid any memory leaking */

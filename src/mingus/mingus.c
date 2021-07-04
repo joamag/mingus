@@ -363,9 +363,12 @@ ERROR_CODE run(char *file_path) {
         );
     }
 
+    /* copies the header contents from the file into the header buffer */
+    memcpy((char *) &state.header, (char *) buffer, sizeof(struct code_header_t));
+
     /* sets the program buffer in the state, effectively initializing
     the virtual machine */
-    state.program = (unsigned int *) (buffer + sizeof(struct code_header_t));
+    state.program = (unsigned int *) (buffer + sizeof(struct code_header_t) + state.header.data_size);
     state.running = TRUE;
 
     /* iterates while the running flag is set */

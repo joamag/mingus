@@ -3,6 +3,7 @@
 *.user
 *.suo
 *.mic
+*.mio
 
 .DS_Store
 
