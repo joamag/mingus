@@ -124,7 +124,12 @@ typedef struct mingus_parser_t {
      */
     struct hash_map_t *labels;
 
-    struct has_map_t *elements;
+    /**
+     * The hash map that associates the index of the data elements
+     * (effective global memory offset position) with the effective
+     * data element structure for it.
+     */
+    struct hash_map_t *elements;
 } mingus_parser;
 
 #define MINGUS_MARK(FOR) MINGUS_MARK_N(FOR, 0)

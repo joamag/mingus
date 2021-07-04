@@ -325,7 +325,7 @@ ERROR_CODE mingus_eval(struct state_t *state) {
 }
 
 ERROR_CODE run(char *file_path) {
-    /* allocates space for some local variables to be 
+    /* allocates space for some local variables to be
     used for internal function operations */
     unsigned int index;
 
