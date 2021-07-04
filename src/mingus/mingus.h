@@ -206,7 +206,7 @@ typedef struct state_t {
      * The current set of global variables that can be
      * used in the virtual machine context.
      */
-    unsigned int globals[LOCALS_SIZE];
+    size_t globals[LOCALS_SIZE];
 
     /**
      * The current instruction to be executed in the
@@ -219,6 +219,12 @@ typedef struct state_t {
      * object file currently in read.
      */
     struct code_header_t header;
+
+    /**
+     * Pointer to the data elements section of the reading
+     * buffer so that the global data values can be accessed.
+     */
+    struct data_elementf_t *data_elements;
 } state;
 
 /**

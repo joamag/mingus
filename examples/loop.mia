@@ -5,7 +5,8 @@ loadi 10
 ; as this position
 start:
     ; compares the current value with zero and if
-    ; that's the case jumps to the end
+    ; that's the case jumps to the end, the 1 in the
+    ; cmp operator means the == comparison
     loadi 0
     cmp 1
     jeq end

@@ -1,8 +1,26 @@
 .data
     hello: db "Hello world!"
+    goodbye: db "Goodbye world!"
 
 .text
+loadi 10
+
 start:
+    loadi 0
+    cmp 1
+    jeq end
+
     load hello
     prints
+    pop
+
+    load goodbye
+    prints
+    pop
+
+    loadi 1
+    sub
+    jmp start
+
+end:
     pop

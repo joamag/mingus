@@ -81,7 +81,7 @@ ERROR_CODE mingus_eval(struct state_t *state) {
 
             /* loads the value located at the immediate location to the stack and
             increments the stack pointer by such value */
-            MINGUS_PUSH(state, state->globals[(size_t) instruction->immediate]);
+            MINGUS_PUSH(state, instruction->immediate);
 
             /* breaks the switch */
             break;
@@ -306,7 +306,7 @@ ERROR_CODE mingus_eval(struct state_t *state) {
 
             /* retrieves the current top value from the stack and
             prints the string in such address to the standard output */
-            PRINTF_F("%s\n", (char *) &state->stack[state->so - 1]);
+            PRINTF_F("%s\n", (char *) state->globals[state->stack[state->so - 1]]);
 
             /* breaks the switch */
             break;
@@ -325,6 +325,10 @@ ERROR_CODE mingus_eval(struct state_t *state) {
 }
 
 ERROR_CODE run(char *file_path) {
+    /* allocates space for some local variables to be 
+    used for internal function operations */
+    unsigned int index;
+
     /* allocates the value to be used to verify the
     existence of error from the function */
     ERROR_CODE return_value;
@@ -365,6 +369,13 @@ ERROR_CODE run(char *file_path) {
 
     /* copies the header contents from the file into the header buffer */
     memcpy((char *) &state.header, (char *) buffer, sizeof(struct code_header_t));
+
+    /* stores the pointer to the complete set of data elements in memory and then
+    updates the global variables with their respective buffer values */
+    state.data_elements = (struct data_element_f *) (buffer + sizeof(struct code_header_t));
+    for(index = 0; index < state.header.data_count; index++) {
+        state.globals[index] = state.data_elements[index].value;
+    }
 
     /* sets the program buffer in the state, effectively initializing
     the virtual machine */
