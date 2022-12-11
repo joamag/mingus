@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     container: gcc:${{ matrix.gcc-version }}
     steps:
-      - uses: actions/checkout@v1
+      - name: Checkout code from repository
+        uses: actions/checkout@v3
       - name: Install Viriatum
         run: |
           git clone https://github.com/hivesolutions/viriatum.git
